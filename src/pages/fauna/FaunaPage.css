@@ -269,6 +269,21 @@
   background: #f4f4f4;
 }
 
+.species-images {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.species-images img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #f4f4f4;
+}
+
 .species-meta {
   display: flex;
   flex-direction: column;

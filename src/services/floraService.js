@@ -65,7 +65,7 @@ import { get } from './api.js';
  * });
  */
 export async function getPlantas(filters = {}) {
-  return get('/flora/', filters);
+  return get('/flora/flora/', filters);
 }
 
 /**
@@ -76,7 +76,7 @@ export async function getPlantas(filters = {}) {
  * const guayacan = await getPlantaById(1);
  */
 export async function getPlantaById(id) {
-  return get(`/flora/${id}/`);
+  return get(`/flora/flora/${id}/`);
 }
 
 /**
@@ -87,7 +87,7 @@ export async function getPlantaById(id) {
  * const fotos = await getPlantaFotos(1);
  */
 export async function getPlantaFotos(id) {
-  return get(`/flora/${id}/fotos/`);
+  return get(`/flora/flora/${id}/fotos/`);
 }
 
 /**

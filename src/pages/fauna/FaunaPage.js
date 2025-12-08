@@ -1,11 +1,11 @@
 // ...existing code...
+
 class FaunaPage {
-  constructor(containerId = "app") {
-    this.container = document.getElementById(containerId);
+  constructor(container) {
+    this.container = container;
     this.species = [];
     this.filtered = [];
     this.filters = { query: "", category: "", status: "", letter: "" };
-    this.selectedSpecies = null;
     this.loading = false;
   }
 
@@ -49,32 +49,43 @@ class FaunaPage {
   }
 
   attachEvents() {
-    document.getElementById("search-input").addEventListener("input", (e) => {
-      this.filters.query = e.target.value;
-      this.applyFilters();
-    });
+    const searchInput = document.getElementById("search-input");
+    const categoryFilter = document.getElementById("category-filter");
+    const statusFilter = document.getElementById("status-filter");
 
-    document.getElementById("category-filter").addEventListener("change", (e) => {
-      this.filters.category = e.target.value;
-      this.applyFilters();
-    });
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        this.filters.query = e.target.value;
+        this.applyFilters();
+      });
+    }
 
-    document.getElementById("status-filter").addEventListener("change", (e) => {
-      this.filters.status = e.target.value;
-      this.applyFilters();
-    });
+    if (categoryFilter) {
+      categoryFilter.addEventListener("change", (e) => {
+        this.filters.category = e.target.value;
+        this.applyFilters();
+      });
+    }
+
+    if (statusFilter) {
+      statusFilter.addEventListener("change", (e) => {
+        this.filters.status = e.target.value;
+        this.applyFilters();
+      });
+    }
   }
 
   async loadSpecies() {
     this.loading = true;
     this.showLoading();
     try {
-      const res = await fetch("/api/species");
+      const res = await fetch("http://localhost:8000/fauna/fauna/");
       if (!res.ok) throw new Error("Error al cargar especies");
       this.species = await res.json();
       this.populateFilters();
       this.applyFilters();
     } catch (err) {
+      console.error("Error:", err);
       this.showError(err.message);
     } finally {
       this.loading = false;
@@ -82,8 +93,8 @@ class FaunaPage {
   }
 
   populateFilters() {
-    const categories = [...new Set(this.species.map((s) => s.category).filter(Boolean))];
-    const statuses = [...new Set(this.species.map((s) => s.status).filter(Boolean))];
+    const categories = [...new Set(this.species.map((s) => s.categoria).filter(Boolean))];
+    const statuses = [...new Set(this.species.map((s) => s.estado_conservacion).filter(Boolean))];
 
     const catSelect = document.getElementById("category-filter");
     categories.forEach((cat) => {
@@ -121,10 +132,10 @@ class FaunaPage {
 
   applyFilters() {
     this.filtered = this.species.filter((s) => {
-      const matchQuery = !this.filters.query || s.commonName?.toLowerCase().includes(this.filters.query.toLowerCase());
-      const matchCategory = !this.filters.category || s.category === this.filters.category;
-      const matchStatus = !this.filters.status || s.status === this.filters.status;
-      const matchLetter = !this.filters.letter || s.commonName?.toUpperCase().startsWith(this.filters.letter);
+      const matchQuery = !this.filters.query || s.nombre_comun?.toLowerCase().includes(this.filters.query.toLowerCase());
+      const matchCategory = !this.filters.category || s.categoria === this.filters.category;
+      const matchStatus = !this.filters.status || s.estado_conservacion === this.filters.status;
+      const matchLetter = !this.filters.letter || s.nombre_comun?.toUpperCase().startsWith(this.filters.letter);
       return matchQuery && matchCategory && matchStatus && matchLetter;
     });
     this.renderGallery();
@@ -134,6 +145,8 @@ class FaunaPage {
     const gallery = document.getElementById("gallery");
     const empty = document.getElementById("empty");
     const error = document.getElementById("error");
+
+    if (!gallery) return;
 
     error.style.display = "none";
     empty.style.display = "none";
@@ -150,16 +163,16 @@ class FaunaPage {
         (s) => `
       <div class="gallery-item" data-id="${s.id}">
         <div class="gallery-item-image">
-          <img src="${s.image || "/placeholder-species.png"}" alt="${s.commonName}" />
+          <img src="${s.foto_principal || "/placeholder-species.png"}" alt="${s.nombre_comun}" />
           <div class="gallery-item-overlay">
             <button class="gallery-item-btn">Ver detalles</button>
           </div>
         </div>
         <div class="gallery-item-info">
-          <h3 class="gallery-item-name">${s.commonName || "Sin nombre"}</h3>
+          <h3 class="gallery-item-name">${s.nombre_comun || "Sin nombre"}</h3>
           <p class="gallery-item-meta">
-            <span class="gallery-item-category">${s.category || "—"}</span>
-            ${s.status ? `<span class="gallery-item-status">${s.status}</span>` : ""}
+            <span class="gallery-item-category">${s.categoria || "—"}</span>
+            ${s.estado_conservacion ? `<span class="gallery-item-status">${s.estado_conservacion}</span>` : ""}
           </p>
         </div>
       </div>
@@ -170,28 +183,32 @@ class FaunaPage {
     gallery.querySelectorAll(".gallery-item").forEach((item) => {
       item.addEventListener("click", () => {
         const id = item.dataset.id;
-        const species = this.species.find((s) => s.id == id);
-        if (species) {
-          const detailPage = new FaunaDetailPage("app");
-          detailPage.init(species);
-        }
+        window.location.hash = `/fauna/${id}`;
       });
     });
   }
 
   showLoading() {
-    document.getElementById("loading").style.display = "block";
-    document.getElementById("gallery").style.display = "none";
+    const loading = document.getElementById("loading");
+    const gallery = document.getElementById("gallery");
+    if (loading) loading.style.display = "block";
+    if (gallery) gallery.style.display = "none";
   }
 
   showError(msg) {
     const error = document.getElementById("error");
-    error.textContent = msg;
-    error.style.display = "block";
-    document.getElementById("gallery").style.display = "none";
+    const gallery = document.getElementById("gallery");
+    if (error) {
+      error.textContent = msg;
+      error.style.display = "block";
+    }
+    if (gallery) gallery.style.display = "none";
   }
 }
 
-// Exportar para usar en HTML
-window.FaunaPage = FaunaPage;
+// Exportar como default la función render
+export default async function render(container, params = {}) {
+  const page = new FaunaPage(container);
+  await page.init();
+}
 // ...existing code...

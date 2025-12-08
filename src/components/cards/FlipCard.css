@@ -63,6 +63,16 @@
 /* ============================================================
    CONTENIDO
    ============================================================ */
+
+.flip-cover {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: #f0f0f0;
+  display: block;
+}
+
 .flip-body {
   padding: 1rem;
   display: flex;
@@ -74,11 +84,14 @@
 .flip-title {
   font-size: 1rem;
   font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
 }
 
 .flip-subtitle {
   font-size: 0.85rem;
   opacity: 0.7;
+  margin: 0;
 }
 
 .flip-actions {
@@ -91,10 +104,19 @@
    TAMAÑOS (TODOS LOS CARDS CON LA MISMA ALTURA)
    ============================================================ */
 .flip-card {
-  aspect-ratio: 3 / 4;  /* Proporción consistente */
-  min-height: 360px;     /* Altura mínima igual para todos */
+  aspect-ratio: 3 / 4;
+  height: 380px;
+  width: 100%;
 }
 
-.flip-sm { min-height: 260px; }
-.flip-md { min-height: 320px; }
-.flip-lg { min-height: 380px; }
+.flip-sm { 
+  height: 320px;
+}
+
+.flip-md { 
+  height: 380px;
+}
+
+.flip-lg { 
+  height: 420px;
+}

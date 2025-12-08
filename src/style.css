@@ -94,3 +94,12 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* src/style.css */
+/* Punto de entrada de estilos globales */
+
+@import url("./styles/variables.css");
+@import url("./styles/reset.css");
+@import url("./styles/global.css");
+
+/* Aquí puedes agregar overrides específicos o estilos temporales si lo necesitas */

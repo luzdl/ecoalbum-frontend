@@ -5,3 +5,5 @@ import { initRouter } from './router/router.js'
 document.addEventListener('DOMContentLoaded', () => {
   initRouter('#app')
 })
+
+import "./style.css";

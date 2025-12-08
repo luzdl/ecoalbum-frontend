@@ -1,0 +1,22 @@
+.flora-page {
+  padding: 1rem;
+}
+
+.flora-page .page-header {
+  margin-bottom: 1rem;
+}
+
+.filters-section {
+  margin-bottom: 1rem;
+}
+
+.gallery-section {
+  margin-top: 1rem;
+}
+
+.detail-placeholder ul {
+  list-style: disc;
+  margin-left: 1.25rem;
+}
+
+/* Reuse gallery styles from components/gallery/Gallery.css */

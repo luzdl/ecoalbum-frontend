@@ -8,12 +8,38 @@ class FaunaDetailPage {
     this.species = null;
     this.threats = [];
     this.conservationActions = [];
+    this.categoryName = "";
   }
 
   async init(species) {
     this.species = species;
-    await this.loadThreatsAndActions();
+    await Promise.all([
+      this.loadThreatsAndActions(),
+      this.loadCategoryName()
+    ]);
     this.render();
+  }
+
+  async loadCategoryName() {
+    try {
+      const categoryId = this.species?.categoria;
+      if (!categoryId) return;
+      
+      // Si ya es un string (nombre), usarlo directamente
+      if (typeof categoryId === 'string' && isNaN(categoryId)) {
+        this.categoryName = categoryId;
+        return;
+      }
+      
+      const res = await fetch(`http://localhost:8000/api/fauna/categorias/${categoryId}/`);
+      if (res.ok) {
+        const data = await res.json();
+        this.categoryName = data.nombre || categoryId;
+      }
+    } catch (err) {
+      console.error("Error loading category:", err);
+      this.categoryName = this.species?.categoria || "";
+    }
   }
 
   async loadThreatsAndActions() {

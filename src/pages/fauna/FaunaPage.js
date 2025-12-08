@@ -5,12 +5,14 @@ class FaunaPage {
     this.container = container;
     this.species = [];
     this.filtered = [];
+    this.categories = []; // Map de categorías: { id, nombre, descripcion }
     this.filters = { query: "", category: "", status: "", letter: "" };
     this.loading = false;
   }
 
   async init() {
     this.render();
+    await this.loadCategories();
     await this.loadSpecies();
   }
 
@@ -76,6 +78,31 @@ class FaunaPage {
   }
 
   // ...existing code...
+  async loadCategories() {
+    try {
+      const res = await fetch("http://localhost:8000/api/fauna/categorias/", {
+        headers: { Accept: "application/json" }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.categories = Array.isArray(data) ? data : (data?.results || []);
+        console.log("Categorías cargadas:", this.categories);
+      }
+    } catch (err) {
+      console.error("Error loading categories:", err);
+      this.categories = [];
+    }
+  }
+
+  getCategoryName(categoryId) {
+    if (!categoryId) return "—";
+    // Si ya es un string (nombre), retornarlo
+    if (typeof categoryId === 'string' && isNaN(categoryId)) return categoryId;
+    // Buscar en el mapa de categorías
+    const cat = this.categories.find(c => c.id === parseInt(categoryId) || c.id === categoryId);
+    return cat?.nombre || categoryId;
+  }
+
   async loadSpecies() {
     this.loading = true;
     this.showLoading();
@@ -120,18 +147,23 @@ class FaunaPage {
 // ...existing code...
 
   populateFilters() {
-    const categories = [...new Set(this.species.map((s) => s.categoria).filter(Boolean))];
+    // Usar las categorías cargadas del API
     const statuses = [...new Set(this.species.map((s) => s.estado_conservacion).filter(Boolean))];
 
     const catSelect = document.getElementById("category-filter");
-    categories.forEach((cat) => {
+    // Limpiar opciones existentes excepto la primera
+    catSelect.innerHTML = '<option value="">Categoría</option>';
+    
+    // Agregar categorías del API
+    this.categories.forEach((cat) => {
       const opt = document.createElement("option");
-      opt.value = cat;
-      opt.textContent = cat;
+      opt.value = cat.id; // Usar ID como valor para filtrar
+      opt.textContent = cat.nombre; // Mostrar nombre en el dropdown
       catSelect.appendChild(opt);
     });
 
     const statSelect = document.getElementById("status-filter");
+    statSelect.innerHTML = '<option value="">Estado</option>';
     statuses.forEach((st) => {
       const opt = document.createElement("option");
       opt.value = st;
@@ -160,7 +192,10 @@ class FaunaPage {
   applyFilters() {
     this.filtered = this.species.filter((s) => {
       const matchQuery = !this.filters.query || s.nombre_comun?.toLowerCase().includes(this.filters.query.toLowerCase());
-      const matchCategory = !this.filters.category || s.categoria === this.filters.category;
+      // Comparar por ID de categoría (puede ser número o string)
+      const matchCategory = !this.filters.category || 
+        String(s.categoria) === String(this.filters.category) || 
+        s.categoria === parseInt(this.filters.category);
       const matchStatus = !this.filters.status || s.estado_conservacion === this.filters.status;
       const matchLetter = !this.filters.letter || s.nombre_comun?.toUpperCase().startsWith(this.filters.letter);
       return matchQuery && matchCategory && matchStatus && matchLetter;
@@ -198,7 +233,7 @@ class FaunaPage {
         <div class="gallery-item-info">
           <h3 class="gallery-item-name">${s.nombre_comun || "Sin nombre"}</h3>
           <p class="gallery-item-meta">
-            <span class="gallery-item-category">${s.categoria || "—"}</span>
+            <span class="gallery-item-category">${this.getCategoryName(s.categoria)}</span>
             ${s.estado_conservacion ? `<span class="gallery-item-status">${s.estado_conservacion}</span>` : ""}
           </p>
         </div>

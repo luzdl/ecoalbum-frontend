@@ -1,0 +1,69 @@
+/* Design tokens EcoAlbum - Light (default) + Dark (opcional por data-theme) */
+:root {
+  /* BRAND */
+  --color-primary: #2d5a27;      /* verde bosque */
+  --color-secondary: #8b4513;    /* marrón tierra */
+  --color-accent: #f39a2d;       /* acento cálido */
+
+  /* LIGHT THEME – ficha educativa */
+  --color-bg: #f6f9fc;           /* fondo base */
+  --color-bg-soft: #eef3f7;      /* secciones suaves */
+  --color-surface: #ffffffcc;    /* tarjeta - glass sutil */
+  --color-surface-strong: #ffffffff;
+  --color-text: #0b1b22;         /* texto principal */
+  --color-text-muted: #51606b;   /* texto secundario */
+  --color-border: #d7e0e8;       /* borde claro */
+  --color-divider: rgba(15, 23, 42, 0.08);
+
+  /* Estados de conservación */
+  --color-lc: #2e7d32;
+  --color-nt: #7cb342;
+  --color-vu: #f6c000;
+  --color-en: #fb8c00;
+  --color-cr: #e53935;
+
+  /* Tipografía y escala */
+  --font-family-base: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-heading: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-size-xs: .75rem;
+  --font-size-sm: .875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+
+  /* Espaciado */
+  --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem;
+  --space-6:1.5rem; --space-8:2rem; --space-10:2.5rem;
+
+  /* Radios / sombras */
+  --radius-sm:.375rem; --radius-md:.5rem; --radius-lg:.75rem; --radius-xl:1rem; --radius-full:9999px;
+
+  /* Sombras pensadas para claro */
+  --shadow-1: 0 2px 8px rgba(16, 24, 40, 0.08);
+  --shadow-2: 0 6px 20px rgba(16, 24, 40, 0.10);
+  --shadow-3: 0 12px 28px rgba(16, 24, 40, 0.12);
+
+  /* Efecto glass */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-blur: 12px;
+  --glass-saturate: 1.2;
+
+  /* Layout */
+  --layout-max-width: 1120px;
+}
+
+/* Tema oscuro opcional (por si luego habilitas un switch) */
+:root[data-theme="dark"] {
+  --color-bg: #0f1720;
+  --color-bg-soft: #15222b;
+  --color-surface: #1f2d38cc;
+  --color-surface-strong: #1f2d38;
+  --color-text: #f9fafb;
+  --color-text-muted: #9ca3af;
+  --color-border: #253645;
+  --color-divider: rgba(148, 163, 184, 0.25);
+  --glass-bg: rgba(31, 45, 56, 0.55);
+  --glass-border: rgba(148, 163, 184, 0.25);
+}

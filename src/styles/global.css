@@ -1,0 +1,201 @@
+/* Base claro tipo ficha educativa */
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #ffffff 0%, #f2f7fb 35%, transparent 60%),
+    radial-gradient(800px 400px at 90% 0%, #ffffff 0%, #edf4f9 40%, transparent 70%),
+    var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.app-main { flex: 1; padding: var(--space-6); }
+.container { width: 100%; max-width: var(--layout-max-width); margin-inline: auto; }
+
+/* Tipografía */
+h1,h2,h3,h4 { font-family: var(--font-family-heading); font-weight: 600; letter-spacing: .01em; color: var(--color-text); }
+h1 { font-size: var(--font-size-2xl); }
+h2 { font-size: var(--font-size-xl); }
+h3 { font-size: var(--font-size-lg); }
+p  { color: var(--color-text-muted); line-height: 1.65; }
+
+/* Tarjetas */
+.card {
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-1);
+}
+
+/* Variantes glass (claras y legibles) */
+.card--glass,
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  -webkit-backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-2);
+}
+.glass-strong { backdrop-filter: saturate(1.35) blur(16px); -webkit-backdrop-filter: saturate(1.35) blur(16px); }
+
+/* Cabeceras y subtítulos */
+.card-header { margin-bottom: var(--space-3); }
+.card-title   { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text); }
+.card-subtitle{ font-size: var(--font-size-sm); color: var(--color-text-muted); }
+
+/* Botones */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .6rem 1rem; border-radius: var(--radius-full); font-size: var(--font-size-sm); font-weight: 600;
+  color: #fff; background: linear-gradient(180deg, var(--color-primary), #347233);
+  border: 1px solid #2d5a2740; box-shadow: var(--shadow-1);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); filter: brightness(1.03); }
+.btn:active { transform: translateY(0); box-shadow: var(--shadow-1); }
+
+.btn-outline {
+  background: #ffffff; color: var(--color-primary);
+  border: 1px solid var(--color-border); box-shadow: var(--shadow-1);
+}
+.btn-outline:hover { background: #f7fbff; }
+
+/* Badges de estado (alto contraste en claro) */
+.badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .2rem .6rem; border-radius: var(--radius-full);
+  font-size: var(--font-size-xs); font-weight: 700; letter-spacing: .04em;
+  color: #0b1b22; background: #ffffff; border: 1px solid var(--color-border);
+}
+.badge-dot { width: .5rem; height: .5rem; border-radius: var(--radius-full); }
+.badge-lc .badge-dot{ background: var(--color-lc); }
+.badge-nt .badge-dot{ background: var(--color-nt); }
+.badge-vu .badge-dot{ background: var(--color-vu); }
+.badge-en .badge-dot{ background: var(--color-en); }
+.badge-cr .badge-dot{ background: var(--color-cr); }
+
+/* Controles / Inputs */
+.input, select {
+  background: #fff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  padding: .5rem .75rem;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-1);
+}
+.input::placeholder { color: #8a99a5; }
+.input:focus, select:focus {
+  outline: 2px solid #bfe3c0; /* foco verde pálido */
+  outline-offset: 1px;
+}
+
+/* Barras / layouts */
+.bar { display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
+.bar-left,.bar-right { display:flex; align-items:center; gap: var(--space-2); }
+
+/* Grids */
+.grid { display: grid; gap: var(--space-4); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+/* Utilidades */
+.text-center { text-align: center; }
+.mt-4 { margin-top: var(--space-4); }
+.mb-4 { margin-bottom: var(--space-4); }
+.section { padding-block: var(--space-8); }
+
+/* Footer claro */
+.app-footer{
+  border-top:1px solid var(--color-divider);
+  padding: var(--space-5);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  background: linear-gradient(to top, #f2f7fb, #ffffff00);
+}
+
+/* Elevaciones para modular el glass en componentes */
+.elev-1 { box-shadow: var(--shadow-1); }
+.elev-2 { box-shadow: var(--shadow-2); }
+.elev-3 { box-shadow: var(--shadow-3); }
+
+/* ==== Home (página principal) ==== */
+
+.home-page {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+/* Hero claro con efecto glass legible */
+.hero {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 2.6vw, 2.5rem);
+  margin-bottom: var(--space-2);
+}
+.hero p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+}
+
+/* Navegación principal */
+.home-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+/* Secciones */
+.home-section {
+  margin-bottom: var(--space-8);
+}
+.home-section > h2 {
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+/* Variantes de botón para tus createLink(...) */
+.btn-primary {
+  /* hereda .btn si lo agregaste en el html: class="btn btn-primary" */
+  background: linear-gradient(180deg, var(--color-primary), #347233);
+  color: #fff;
+  border: 1px solid #2d5a2740;
+}
+.btn-secondary {
+  background: #ffffff;
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+}
+.btn-secondary:hover {
+  background: #f7fbff;
+}
+
+/* Tarjetas ya existen con .card; aquí solo afinamos */
+.card {
+  background: var(--color-surface-strong);
+}
+
+/* Placeholder de carruseles */
+.carousel-placeholder {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}

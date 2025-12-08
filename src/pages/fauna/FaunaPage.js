@@ -4,6 +4,8 @@
  */
 
 import { createLink } from '../../router/router.js';
+import { getAnimales } from '../../services/faunaService.js';
+import { loadGallery } from '../../components/gallery/Gallery.js';
 
 /**
  * Renderiza la página de fauna
@@ -29,20 +31,13 @@ export function render(container) {
       
       <section class="gallery-section" id="fauna-gallery">
         <!-- Gallery component with FlipCards will be rendered here -->
-        <div class="gallery-placeholder">
-          <p>Galería de tarjetas de fauna (por implementar)</p>
-          <div class="placeholder-grid">
-            ${Array(6).fill(0).map((_, i) => `
-              <div class="placeholder-card">
-                <div class="placeholder-img"></div>
-                <p>Animal ${i + 1}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
       </section>
     </div>
   `;
+
+  // Cargar datos de fauna desde la API
+  const galleryContainer = container.querySelector('#fauna-gallery');
+  loadGallery(galleryContainer, getAnimales, {}, { type: 'fauna', size: 'md' });
 }
 
 export default { render };

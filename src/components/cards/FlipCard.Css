@@ -1,0 +1,121 @@
+/* Tarjeta con efecto flip 3D (accesible y responsive) */
+.flip-card {
+  position: relative;
+  perspective: 1200px;
+  width: 100%;
+  height: 100%;
+  /* para layouts de grid */
+  display: block;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 560ms cubic-bezier(.2,.7,.2,1);
+  border-radius: var(--radius-lg);
+  overflow: clip;
+}
+
+.flip-card:focus-within .flip-card-inner,
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+}
+
+/* Variante glass opcional */
+.flip-card.glass .flip-card-front,
+.flip-card.glass .flip-card-back {
+  background: var(--glass-bg);
+  backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  -webkit-backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-2);
+}
+
+.flip-card-front {
+  z-index: 2;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Tamaños sugeridos */
+.flip-sm { min-height: 260px; }
+.flip-md { min-height: 320px; }
+.flip-lg { min-height: 380px; }
+
+/* Imagen de portada */
+.flip-cover {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Contenido */
+.flip-body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.flip-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.flip-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.flip-meta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* Footer de acciones */
+.flip-actions {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Botón de flip (mejor UX móvil/teclado) */
+.flip-toggle {
+  margin-left: auto;
+}
+
+/* Accesibilidad / reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .flip-card-inner { transition: none; }
+}
+
+/* Hover en desktop: opcional para demo (sigue funcionando click/teclado) */
+@media (hover: hover) and (pointer: fine) {
+  .flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+  }
+}

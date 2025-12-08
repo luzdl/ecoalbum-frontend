@@ -4,6 +4,8 @@
  */
 
 import { createLink } from '../../router/router.js';
+import { getPlantas } from '../../services/floraService.js';
+import { loadGallery } from '../../components/gallery/Gallery.js';
 
 /**
  * Renderiza la página de flora
@@ -29,20 +31,13 @@ export function render(container) {
       
       <section class="gallery-section" id="flora-gallery">
         <!-- Gallery component with FlipCards will be rendered here -->
-        <div class="gallery-placeholder">
-          <p>Galería de tarjetas de flora (por implementar)</p>
-          <div class="placeholder-grid">
-            ${Array(6).fill(0).map((_, i) => `
-              <div class="placeholder-card">
-                <div class="placeholder-img"></div>
-                <p>Planta ${i + 1}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
       </section>
     </div>
   `;
+
+  // Cargar datos de flora desde la API
+  const galleryContainer = container.querySelector('#flora-gallery');
+  loadGallery(galleryContainer, getPlantas, {}, { type: 'flora', size: 'md' });
 }
 
 export default { render };

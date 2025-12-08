@@ -71,8 +71,7 @@ export function render(container, params) {
           <h3><em>${(planta && planta.nombre_cientifico) || ''}</em></h3>
           <p class="flora-desc">${(planta && planta.descripcion) || 'Sin descripción.'}</p>
           <p><strong>Distribución:</strong> ${(planta && planta.distribucion) || '—'}</p>
-          <p><strong>Hábitat:</strong> ${(planta && planta.habitat) || '—'}</p>
-          <p><strong>Estado:</strong> ${(planta && planta.estado) || '—'}</p>
+          <p><strong>Estado:</strong> ${(planta && (planta.estado_display || planta.estado)) || '—'}</p>
         `;
 
         wrap.appendChild(fotosDiv);

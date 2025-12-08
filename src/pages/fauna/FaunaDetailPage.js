@@ -1,54 +1,56 @@
-/**
- * @fileoverview Página de detalle de un animal
- * @module pages/fauna/FaunaDetailPage
- */
+// ...existing code...
+class FaunaDetailPage {
+  constructor(containerId = "app") {
+    this.container = document.getElementById(containerId);
+    this.species = null;
+  }
 
-import { createLink, getParams } from '../../router/router.js';
+  init(species) {
+    this.species = species;
+    this.render();
+  }
 
-/**
- * Renderiza la página de detalle de fauna
- * @param {HTMLElement} container - Contenedor de la página
- * @param {Object} params - Parámetros de la ruta
- * @param {string} params.id - ID del animal
- */
-export function render(container, params) {
-  const { id } = params;
-  
-  container.innerHTML = `
-    <div class="fauna-detail-page">
-      <header class="page-header">
-        <nav class="breadcrumb">
-          ${createLink('/', 'Inicio')} / 
-          ${createLink('/fauna', 'Fauna')} / 
-          <span>Detalle</span>
-        </nav>
-        <h1>🦁 Detalle del Animal #${id}</h1>
-      </header>
-      
-      <section class="detail-content">
-        <!-- SpeciesDetailModal content will be adapted here -->
-        <div class="detail-placeholder">
-          <p>Información completa del animal (por implementar)</p>
-          <ul>
-            <li>Carrusel de fotos</li>
-            <li>Nombre común y científico</li>
-            <li>Descripción</li>
-            <li>Hábitat</li>
-            <li>Distribución</li>
-            <li>Importancia ecológica</li>
-            <li>Estado de conservación</li>
-            <li>Categoría</li>
-            <li>Amenazas</li>
-            <li>Acciones de protección</li>
-          </ul>
+  render() {
+    const {
+      commonName = "Nombre común no disponible",
+      scientificName = "",
+      image = "",
+      category = "",
+      status = "",
+      description = "",
+      sourceUrl = "",
+    } = this.species || {};
+
+    this.container.innerHTML = `
+      <div class="fauna-detail-page">
+        <div class="detail-modal">
+          <div class="detail-header">
+            <h2>${commonName}</h2>
+            <button class="detail-close" aria-label="Volver">← Volver</button>
+          </div>
+          <div class="detail-content">
+            <div class="species-grid">
+              <img class="species-image" src="${image || "/placeholder-species.png"}" alt="${commonName}" />
+              <div class="species-meta">
+                ${scientificName ? `<div class="species-row" style="font-style: italic; color: #666;">${scientificName}</div>` : ""}
+                <div class="species-row"><strong>Categoría:</strong>&nbsp;${category || "—"}</div>
+                <div class="species-row"><strong>Estado:</strong>&nbsp;${status || "—"}</div>
+                ${sourceUrl ? `<div class="species-row"><a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Ver fuente</a></div>` : ""}
+                <div class="species-description">${description || "No hay descripción disponible."}</div>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
-      
-      <nav class="detail-nav">
-        ${createLink('/fauna', '← Volver a Fauna', 'btn')}
-      </nav>
-    </div>
-  `;
+      </div>
+    `;
+
+    document.querySelector(".detail-close").addEventListener("click", () => {
+      const page = new FaunaPage("app");
+      page.init();
+    });
+  }
 }
 
-export default { render };
+// Exportar para usar en HTML
+window.FaunaDetailPage = FaunaDetailPage;
+// ...existing code...

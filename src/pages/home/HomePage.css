@@ -34,6 +34,7 @@
 /* Secciones */
 .home-section {
   margin-top: var(--space-8);
+  margin-bottom: var(--space-6);
 }
 .section-title {
   text-align: center;

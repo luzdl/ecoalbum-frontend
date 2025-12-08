@@ -2,6 +2,11 @@
 
 .carousel {
   position: relative;
+  overflow: visible;
+}
+
+.carousel-inner {
+  position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
   background: var(--color-surface-strong);
@@ -9,7 +14,7 @@
   box-shadow: var(--shadow-1);
 }
 
-.carousel.glass {
+.carousel.glass .carousel-inner {
   background: var(--glass-bg);
   backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
   -webkit-backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
@@ -69,6 +74,8 @@
   margin-top: auto;
   display: flex;
   gap: var(--space-2);
+  justify-content: flex-end;
+  align-self: flex-end;
 }
 
 /* Controles */
@@ -82,30 +89,55 @@
   pointer-events: auto;
   position: absolute;
   top: 50%;
-  translate: 0 -50%;
-  width: 42px; height: 42px;
+  transform: translateY(-50%);
+  width: 52px; 
+  height: 52px;
   border-radius: var(--radius-full);
   background: #ffffff;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-1);
-  display: grid; place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #344054;
+  line-height: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.carousel-btn:hover { background: #f7fbff; }
-.carousel-btn-prev { left: var(--space-3); }
-.carousel-btn-next { right: var(--space-3); }
+
+.carousel-btn:hover { 
+  background: #f7fbff;
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: var(--shadow-2);
+}
+
+.carousel-btn-prev { 
+  left: var(--space-3);
+}
+
+.carousel-btn-next { 
+  right: var(--space-3);
+}
+
+.carousel-btn svg {
+  width: 28px;
+  height: 28px;
+}
 
 .carousel-dots {
   position: absolute;
   left: 50%;
-  bottom: var(--space-3);
+  bottom: calc(-1 * var(--space-5));
   translate: -50% 0;
   display: flex;
   gap: .4rem;
   padding: .25rem .5rem;
-  background: #ffffffa8;
-  border: 1px solid var(--color-border);
+  background: transparent;
+  border: none;
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-1);
+  box-shadow: none;
+  z-index: 10;
 }
 .carousel-dot {
   width: .55rem; height: .55rem; border-radius: 999px;

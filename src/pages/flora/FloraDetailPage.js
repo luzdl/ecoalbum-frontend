@@ -41,47 +41,61 @@ export function render(container, params) {
 
   (async () => {
     const root = container.querySelector('#flora-detail-root');
-    try {
-      const { planta, fotos } = await getPlantaCompleta(id);
+    async function load() {
+      root.innerHTML = '<div class="gallery-loading">Cargando información…</div>';
+      try {
+        const { planta, fotos } = await getPlantaCompleta(id);
 
-      const wrap = document.createElement('div');
-      wrap.className = 'flora-detail-wrap';
+        const wrap = document.createElement('div');
+        wrap.className = 'flora-detail-wrap';
 
-      // Fotos (simple grid/carrusel placeholder)
-      const fotosDiv = document.createElement('div');
-      fotosDiv.className = 'flora-photos';
-      if (Array.isArray(fotos) && fotos.length) {
-        fotos.forEach((f) => {
-          const img = document.createElement('img');
-          img.src = f.url_foto || '';
-          img.alt = f.descripcion || '';
-          img.className = 'flora-photo';
-          fotosDiv.appendChild(img);
-        });
-      } else {
-        fotosDiv.innerHTML = '<div class="gallery-empty">No hay fotos disponibles</div>';
+        // Fotos (simple grid/carrusel placeholder)
+        const fotosDiv = document.createElement('div');
+        fotosDiv.className = 'flora-photos';
+        if (Array.isArray(fotos) && fotos.length) {
+          fotos.forEach((f) => {
+            const img = document.createElement('img');
+            img.src = f.url_foto || f.url || '';
+            img.alt = f.descripcion || (planta && (planta.nombre_comun || planta.nombre_cientifico)) || 'Foto de planta';
+            img.className = 'flora-photo';
+            fotosDiv.appendChild(img);
+          });
+        } else {
+          fotosDiv.innerHTML = '<div class="gallery-empty">No hay fotos disponibles</div>';
+        }
+
+        const info = document.createElement('div');
+        info.className = 'flora-info';
+        info.innerHTML = `
+          <h2>${(planta && (planta.nombre_comun || 'Sin nombre'))}</h2>
+          <h3><em>${(planta && planta.nombre_cientifico) || ''}</em></h3>
+          <p class="flora-desc">${(planta && planta.descripcion) || 'Sin descripción.'}</p>
+          <p><strong>Distribución:</strong> ${(planta && planta.distribucion) || '—'}</p>
+          <p><strong>Hábitat:</strong> ${(planta && planta.habitat) || '—'}</p>
+          <p><strong>Estado:</strong> ${(planta && planta.estado) || '—'}</p>
+        `;
+
+        wrap.appendChild(fotosDiv);
+        wrap.appendChild(info);
+
+        root.innerHTML = '';
+        root.appendChild(wrap);
+      } catch (err) {
+        console.error('FloraDetailPage load error', err);
+        root.innerHTML = '';
+        const errDiv = document.createElement('div');
+        errDiv.className = 'error';
+        errDiv.textContent = `Error cargando detalle: ${err.message || err}`;
+        const retry = document.createElement('button');
+        retry.className = 'btn-retry';
+        retry.textContent = 'Reintentar';
+        retry.addEventListener('click', load);
+        root.appendChild(errDiv);
+        root.appendChild(retry);
       }
-
-      const info = document.createElement('div');
-      info.className = 'flora-info';
-      info.innerHTML = `
-        <h2>${planta.nombre_comun || 'Sin nombre'}</h2>
-        <h3><em>${planta.nombre_cientifico || ''}</em></h3>
-        <p class="flora-desc">${planta.descripcion || 'Sin descripción.'}</p>
-        <p><strong>Distribución:</strong> ${planta.distribucion || '—'}</p>
-        <p><strong>Hábitat:</strong> ${planta.habitat || '—'}</p>
-        <p><strong>Estado:</strong> ${planta.estado || '—'}</p>
-      `;
-
-      wrap.appendChild(fotosDiv);
-      wrap.appendChild(info);
-
-      root.innerHTML = '';
-      root.appendChild(wrap);
-    } catch (err) {
-      root.innerHTML = `<div class="error">Error cargando detalle: ${err.message}</div>`;
-      console.error('FloraDetailPage load error', err);
     }
+
+    load();
   })();
 }
 

@@ -5,13 +5,19 @@
 
 import { createLink } from '../../router/router.js';
 import { getPlantas, ESTADOS_CONSERVACION } from '../../services/floraService.js';
+import { createFilterBar } from '../../components/filters/FilterBar.js';
+import { loadGallery } from '../../components/gallery/Gallery.js';
 
+/**
+ * FloraPage - integra FilterBar + Gallery + PlantCard (FlipCard)
+ * Usa `getPlantas` como fetchFn para `loadGallery`
+ */
 class FloraPage {
   constructor(container) {
     this.container = container;
     this.plantas = [];
     this.filtered = [];
-    this.filters = { query: '', status: '', letter: '' };
+    this.filters = { query: '', familia: '', estado: '', letter: '' };
     this.loading = false;
   }
 
@@ -25,22 +31,25 @@ class FloraPage {
       <div class="flora-page">
         <header class="flora-header">
           <nav class="breadcrumb">${createLink('/', 'Inicio')} / ${createLink('/flora','Flora')}</nav>
-          <h1>🌺 Flora de Panamá</h1>
-          <p>Explora las plantas protegidas de nuestro país</p>
+          <h1>🌺 Flora del Álbum Ecológico</h1>
+          <p>Explora las plantas y su conservación</p>
         </header>
 
         <div class="flora-filters">
-          <input type="search" id="flora-search" class="filter-input" placeholder="Buscar planta..." aria-label="Buscar" />
-          <select id="flora-status" class="filter-select" aria-label="Filtrar por estado">
+          <input type="search" id="search-input" class="filter-input" placeholder="Buscar planta..." aria-label="Buscar" />
+          <select id="familia-filter" class="filter-select" aria-label="Filtrar por familia">
+            <option value="">Familia</option>
+          </select>
+          <select id="estado-filter" class="filter-select" aria-label="Filtrar por estado">
             <option value="">Estado</option>
           </select>
-          <div id="flora-letter" class="letter-filter"></div>
+          <div id="letter-filter" class="letter-filter"></div>
         </div>
 
-        <div id="flora-gallery" class="gallery-grid"></div>
-        <div id="flora-loading" class="flora-loading" style="display:none;">Cargando...</div>
-        <div id="flora-error" class="flora-error" style="display:none;"></div>
-        <div id="flora-empty" class="flora-empty" style="display:none;">No hay plantas disponibles.</div>
+        <div id="gallery" class="gallery-grid"></div>
+        <div id="loading" class="flora-loading" style="display:none;">Cargando...</div>
+        <div id="error" class="flora-error" style="display:none;"></div>
+        <div id="empty" class="flora-empty" style="display:none;">No se encontraron plantas.</div>
       </div>
     `;
 
@@ -48,56 +57,91 @@ class FloraPage {
   }
 
   attachEvents() {
-    const search = this.container.querySelector('#flora-search');
-    const status = this.container.querySelector('#flora-status');
+    const searchInput = document.getElementById('search-input');
+    const familiaSelect = document.getElementById('familia-filter');
+    const estadoSelect = document.getElementById('estado-filter');
 
-    if (search) {
-      search.addEventListener('input', (e) => {
-        this.filters.query = e.target.value;
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        this.filters.query = e.target.value || '';
         this.applyFilters();
       });
     }
 
-    if (status) {
-      status.addEventListener('change', (e) => {
-        this.filters.status = e.target.value;
+    if (familiaSelect) {
+      familiaSelect.addEventListener('change', (e) => {
+        this.filters.familia = e.target.value;
+        this.applyFilters();
+      });
+    }
+
+    if (estadoSelect) {
+      estadoSelect.addEventListener('change', (e) => {
+        this.filters.estado = e.target.value;
         this.applyFilters();
       });
     }
   }
 
   async loadPlantas() {
+    this.loading = true;
     this.showLoading();
+
     try {
       const res = await getPlantas();
-      const items = Array.isArray(res) ? res : (res && res.results) ? res.results : (res && res.items) ? res.items : [];
-      this.plantas = items;
-        this.populateFilters();
+      // Normalizar respuesta a array
+      if (!res) this.plantas = [];
+      else if (Array.isArray(res)) this.plantas = res;
+      else if (res.results && Array.isArray(res.results)) this.plantas = res.results;
+      else if (res.items && Array.isArray(res.items)) this.plantas = res.items;
+      else if (typeof res === 'object') this.plantas = Object.values(res);
+      else this.plantas = [];
+
+      this.populateFilters();
       this.applyFilters();
     } catch (err) {
       console.error('Error cargando plantas:', err);
-      this.showError(err.message || 'Error al cargar las plantas');
-      // leave plantas empty; user sees error and can retry later
+      this.plantas = [];
+      this.showError(err.message || 'Error al cargar plantas');
     } finally {
-      this.hideLoading();
+      this.loading = false;
     }
   }
 
   populateFilters() {
-    const statusSelect = this.container.querySelector('#flora-status');
-    if (statusSelect) {
-      statusSelect.innerHTML = '<option value="">Estado</option>';
-      ESTADOS_CONSERVACION.forEach((st) => {
+    const familias = [...new Set(this.plantas.map((p) => p.familia).filter(Boolean))];
+    const estados = [...new Set(this.plantas.map((p) => p.estado || p.estado_conservacion).filter(Boolean))];
+
+    const famSelect = document.getElementById('familia-filter');
+    famSelect.innerHTML = `<option value="">Familia</option>`;
+    familias.forEach((f) => {
+      const opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = f;
+      famSelect.appendChild(opt);
+    });
+
+    const estSelect = document.getElementById('estado-filter');
+    estSelect.innerHTML = `<option value="">Estado</option>`;
+    // preferir la lista proporcionada por el servicio si existe
+    if (Array.isArray(ESTADOS_CONSERVACION) && ESTADOS_CONSERVACION.length) {
+      ESTADOS_CONSERVACION.forEach((s) => {
         const opt = document.createElement('option');
-        opt.value = st;
-        opt.textContent = st;
-        statusSelect.appendChild(opt);
+        opt.value = s;
+        opt.textContent = s;
+        estSelect.appendChild(opt);
+      });
+    } else {
+      estados.forEach((s) => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        estSelect.appendChild(opt);
       });
     }
 
-    const letterDiv = this.container.querySelector('#flora-letter');
-    if (!letterDiv) return;
-    letterDiv.innerHTML = '<button class="letter-btn active" data-letter="">Todas</button>';
+    const letterDiv = document.getElementById('letter-filter');
+    letterDiv.innerHTML = `<button class="letter-btn active" data-letter="">Todas</button>`;
     for (let i = 65; i <= 90; i++) {
       const letter = String.fromCharCode(i);
       const btn = document.createElement('button');
@@ -105,8 +149,7 @@ class FloraPage {
       btn.textContent = letter;
       btn.dataset.letter = letter;
       btn.addEventListener('click', () => {
-        const all = letterDiv.querySelectorAll('.letter-btn');
-        all.forEach((b) => b.classList.remove('active'));
+        document.querySelectorAll('.letter-btn').forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
         this.filters.letter = letter;
         this.applyFilters();
@@ -116,58 +159,64 @@ class FloraPage {
   }
 
   applyFilters() {
-    const q = this.filters.query && this.filters.query.toLowerCase();
-    const st = this.filters.status;
-    const lt = this.filters.letter;
-
     this.filtered = this.plantas.filter((p) => {
-      const name = (p.nombre_comun || p.nombre_cientifico || '').toString();
-      const matchQuery = !q || name.toLowerCase().includes(q);
-      const matchStatus = !st || (p.estado && p.estado === st);
-      const matchLetter = !lt || (name && name.toUpperCase().startsWith(lt));
-      return matchQuery && matchStatus && matchLetter;
+      const name = p.nombre_comun || p.nombre_cientifico || '';
+      const matchQuery = !this.filters.query || name.toLowerCase().includes(this.filters.query.toLowerCase());
+      const matchFamilia = !this.filters.familia || p.familia === this.filters.familia;
+      const estadoField = p.estado || p.estado_conservacion || '';
+      const matchEstado = !this.filters.estado || estadoField === this.filters.estado;
+      const matchLetter = !this.filters.letter || name.toUpperCase().startsWith(this.filters.letter);
+      return matchQuery && matchFamilia && matchEstado && matchLetter;
     });
 
     this.renderGallery();
   }
 
   renderGallery() {
-    const gallery = this.container.querySelector('#flora-gallery');
-    const empty = this.container.querySelector('#flora-empty');
-    const error = this.container.querySelector('#flora-error');
+    const gallery = document.getElementById('gallery');
+    const empty = document.getElementById('empty');
+    const error = document.getElementById('error');
+
     if (!gallery) return;
 
     error.style.display = 'none';
     empty.style.display = 'none';
     gallery.style.display = 'grid';
 
-    if (!this.filtered || this.filtered.length === 0) {
+    if (this.filtered.length === 0) {
       gallery.style.display = 'none';
       empty.style.display = 'block';
+      gallery.innerHTML = '';
       return;
     }
 
-    gallery.innerHTML = this.filtered.map((p) => {
-      const id = p.id_planta || p.id || p.pk || '';
-      const img = p.foto_principal || p.url_foto || p.image || '/placeholder-species.png';
-      const estado = p.estado || '';
-      return `
+    gallery.innerHTML = this.filtered
+      .map((p) => {
+        const id = p.id_planta || p.id || p.pk || '';
+        const img = p.foto_principal || p.url_foto || p.imagen || p.url || '/placeholder-species.png';
+        const nombre = p.nombre_comun || p.nombre_cientifico || 'Sin nombre';
+        const familia = p.familia || '—';
+        const estado = p.estado || p.estado_conservacion || '';
+
+        return `
         <div class="gallery-item" data-id="${id}">
           <div class="gallery-item-image">
-            <img src="${img}" alt="${(p.nombre_comun || p.nombre_cientifico) || 'Planta'}" />
+            <img src="${img}" alt="${nombre}" onerror="this.src='/placeholder-species.png'" />
             <div class="gallery-item-overlay">
               <button class="gallery-item-btn">Ver detalles</button>
             </div>
           </div>
           <div class="gallery-item-info">
-            <h3 class="gallery-item-name">${p.nombre_comun || 'Sin nombre'}</h3>
+            <h3 class="gallery-item-name">${nombre}</h3>
             <p class="gallery-item-meta">
+              <span class="gallery-item-family">${familia}</span>
               ${estado ? `<span class="gallery-item-status">${estado}</span>` : ''}
             </p>
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     gallery.querySelectorAll('.gallery-item').forEach((item) => {
       item.addEventListener('click', () => {
@@ -179,35 +228,20 @@ class FloraPage {
   }
 
   showLoading() {
-    const l = this.container.querySelector('#flora-loading');
-    const g = this.container.querySelector('#flora-gallery');
-    if (l) l.style.display = 'block';
-    if (g) g.style.display = 'none';
-  }
-
-  hideLoading() {
-    const l = this.container.querySelector('#flora-loading');
-    if (l) l.style.display = 'none';
+    const loading = document.getElementById('loading');
+    const gallery = document.getElementById('gallery');
+    if (loading) loading.style.display = 'block';
+    if (gallery) gallery.style.display = 'none';
   }
 
   showError(msg) {
-    const e = this.container.querySelector('#flora-error');
-    const g = this.container.querySelector('#flora-gallery');
-    if (e) {
-      e.innerHTML = '';
-      const txt = document.createElement('span');
-      txt.textContent = msg;
-      e.appendChild(txt);
-      const btn = document.createElement('button');
-      btn.id = 'flora-retry';
-      btn.className = 'btn-retry';
-      btn.textContent = 'Reintentar';
-      btn.addEventListener('click', () => this.loadPlantas());
-      e.appendChild(document.createTextNode(' '));
-      e.appendChild(btn);
-      e.style.display = 'block';
+    const error = document.getElementById('error');
+    const gallery = document.getElementById('gallery');
+    if (error) {
+      error.textContent = msg;
+      error.style.display = 'block';
     }
-    if (g) g.style.display = 'none';
+    if (gallery) gallery.style.display = 'none';
   }
 }
 

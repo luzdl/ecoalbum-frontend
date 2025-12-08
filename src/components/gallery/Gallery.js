@@ -32,6 +32,7 @@ function mapItemData(item, type = 'fauna') {
     habitat: item.habitat || 'Desconocido',
     region: item.distribucion || 'Panamá',
     summary: item.descripcion || '',
+    type: type === 'fauna' ? 'Mamífero' : 'Planta',
     url: `#/${routePrefix}/${itemId}`,
   };
 }

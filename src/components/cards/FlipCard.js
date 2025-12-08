@@ -6,11 +6,14 @@
  *   grid.appendChild(el);
  */
 
+import './FlipCard.Css';
+
 export function createFlipCard({ front, back, size = 'md', glass = false, title = '' } = {}) {
   const root = document.createElement('article');
   root.className = `flip-card flip-${size}${glass ? ' glass' : ''}`;
   root.setAttribute('tabindex', '0'); // focusable para teclado
   if (title) root.setAttribute('aria-label', title);
+  root.style.cursor = 'pointer'; // Indicar que es clickeable
 
   root.innerHTML = `
     <div class="flip-card-inner" aria-live="polite">

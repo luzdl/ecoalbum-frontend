@@ -1,25 +1,41 @@
-// ...existing code...
-import React, { useEffect, useState } from "react";
+/**
+ * SearchInput - Input de búsqueda vanilla JS con debounce
+ * @module components/filters/SearchInput
+ */
 
-export default function SearchInput({ value = "", onChange = () => {}, placeholder = "Buscar...", debounceMs = 300 }) {
-  const [local, setLocal] = useState(value);
-
-  useEffect(() => setLocal(value), [value]);
-
-  useEffect(() => {
-    const t = setTimeout(() => onChange(local), debounceMs);
-    return () => clearTimeout(t);
-  }, [local, onChange, debounceMs]);
-
-  return (
-    <input
-      type="search"
-      value={local}
-      onChange={(e) => setLocal(e.target.value)}
-      placeholder={placeholder}
-      aria-label="Buscar"
-      style={{ padding: "6px 8px", minWidth: 160 }}
-    />
-  );
+/**
+ * Crea un input de búsqueda con debounce
+ * @param {Object} options - Opciones
+ * @param {string} [options.value=''] - Valor inicial
+ * @param {Function} [options.onChange] - Callback cuando cambia el valor
+ * @param {string} [options.placeholder='Buscar...'] - Placeholder
+ * @param {number} [options.debounceMs=300] - Tiempo de debounce
+ * @returns {HTMLElement} Input element
+ */
+export function createSearchInput({ value = '', onChange = () => {}, placeholder = 'Buscar...', debounceMs = 300 } = {}) {
+  const input = document.createElement('input');
+  input.type = 'search';
+  input.value = value;
+  input.placeholder = placeholder;
+  input.setAttribute('aria-label', 'Buscar');
+  input.className = 'search-input';
+  input.style.cssText = 'padding: 6px 8px; min-width: 160px;';
+  
+  let timeoutId = null;
+  
+  input.addEventListener('input', (e) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      onChange(e.target.value);
+    }, debounceMs);
+  });
+  
+  // Método para actualizar valor externamente
+  input.setValue = (newValue) => {
+    input.value = newValue;
+  };
+  
+  return input;
 }
-// ...existing code...
+
+export default { createSearchInput };

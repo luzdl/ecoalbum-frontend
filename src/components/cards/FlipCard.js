@@ -82,32 +82,49 @@ export function buildFront({ image, title, subtitle, statusBadge }) {
   return wrap;
 }
 
-export function buildBack({ paragraphs = [], habitat, region, actions = [] }) {
+export function buildBack({ title, paragraphs = [], habitat, region, status, actions = [] }) {
   const wrap = document.createElement('div');
   wrap.className = 'flip-body';
+  
+  if (title) {
+    const h = document.createElement('h4');
+    h.className = 'flip-title';
+    h.textContent = title;
+    wrap.appendChild(h);
+  }
+  
   if (paragraphs.length) {
     paragraphs.forEach(t => {
       const p = document.createElement('p');
       p.textContent = t;
+      p.style.fontSize = 'var(--font-size-sm)';
+      p.style.marginBottom = 'var(--space-2)';
       wrap.appendChild(p);
     });
   }
+  
   if (habitat || region) {
     const meta = document.createElement('p');
     meta.className = 'flip-subtitle';
-    meta.textContent = `${habitat ? `Hábitat: ${habitat}` : ''}${habitat && region ? ' · ' : ''}${region ? `Región: ${region}` : ''}`;
+    meta.textContent = `${habitat ? `🌿 ${habitat}` : ''}${habitat && region ? ' · ' : ''}${region ? `📍 ${region}` : ''}`;
     wrap.appendChild(meta);
   }
 
   if (actions.length) {
     const bar = document.createElement('div');
     bar.className = 'flip-actions';
+    bar.style.marginTop = 'auto';
+    bar.style.paddingTop = 'var(--space-3)';
+    bar.style.borderTop = '1px solid var(--color-border)';
     actions.forEach(a => {
       const btn = document.createElement('a');
       btn.href = a.href ?? '#';
-      btn.className = `btn ${a.variant ?? ''}`;
+      btn.className = `btn ${a.variant ?? 'btn-primary'}`;
       btn.textContent = a.label ?? 'Acción';
       btn.setAttribute('data-no-flip', 'true');
+      if (a.target) btn.target = a.target;
+      btn.style.flex = '1';
+      btn.style.textAlign = 'center';
       bar.appendChild(btn);
     });
     wrap.appendChild(bar);

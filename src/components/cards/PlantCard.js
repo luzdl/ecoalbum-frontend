@@ -21,23 +21,24 @@ export function renderPlantCard(plant, { size = 'md', glass = false } = {}) {
   const badge = makeBadge(plant.status);
   const front = buildFront({
     image: plant.image,
-    title: `${plant.name} ${plant.scientificName ? `(${plant.scientificName})` : ''}`,
-    subtitle: `Planta | ${plant.habitat ?? 'Hábitat desconocido'}`,
+    title: `${plant.name}`,
+    subtitle: `${plant.scientificName ? plant.scientificName : ''} | Planta`,
     statusBadge: badge,
   });
 
   const paragraphs = [];
   if (plant.summary) paragraphs.push(plant.summary);
 
-  const actions = [];
-  if (plant.url) {
-    actions.push({ href: plant.url, label: 'Ver ficha', variant: '' });
-  }
+  const actions = [
+    { href: plant.url ?? '#', label: 'Aprender más', variant: 'btn-primary', target: '_blank' }
+  ];
 
   const back = buildBack({
+    title: 'Información',
     paragraphs,
     habitat: plant.habitat,
     region: plant.region,
+    status: plant.status,
     actions,
   });
 

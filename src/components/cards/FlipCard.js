@@ -6,7 +6,7 @@
  *   grid.appendChild(el);
  */
 
-import './FlipCard.Css';
+import './FlipCard.css';
 
 export function createFlipCard({ front, back, size = 'md', glass = false, title = '' } = {}) {
   const root = document.createElement('article');

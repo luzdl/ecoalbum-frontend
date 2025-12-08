@@ -5,6 +5,9 @@
 @import url("./styles/reset.css");
 @import url("./styles/global.css");
 
+/* Layout */
+@import "./components/layout/Layout.css";
+
 /* Componentes */
 @import "./components/cards/FlipCard.css";
 @import "./components/carousels/Carousel.css";

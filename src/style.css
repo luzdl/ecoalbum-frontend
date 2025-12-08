@@ -103,3 +103,4 @@ button:focus-visible {
 @import url("./styles/global.css");
 
 /* Aquí puedes agregar overrides específicos o estilos temporales si lo necesitas */
+@import "./components/cards/FlipCard.css";

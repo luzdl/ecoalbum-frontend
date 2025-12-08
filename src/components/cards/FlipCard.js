@@ -84,7 +84,7 @@ export function buildFront({ image, title, subtitle, statusBadge }) {
 
 export function buildBack({ title, paragraphs = [], habitat, region, status, actions = [] }) {
   const wrap = document.createElement('div');
-  wrap.className = 'flip-body';
+  wrap.className = 'flip-body flip-back-body';
   
   if (title) {
     const h = document.createElement('h4');
@@ -98,7 +98,7 @@ export function buildBack({ title, paragraphs = [], habitat, region, status, act
       const p = document.createElement('p');
       p.textContent = t;
       p.style.fontSize = 'var(--font-size-sm)';
-      p.style.marginBottom = 'var(--space-2)';
+      p.style.lineHeight = '1.5';
       wrap.appendChild(p);
     });
   }
@@ -106,6 +106,7 @@ export function buildBack({ title, paragraphs = [], habitat, region, status, act
   if (habitat || region) {
     const meta = document.createElement('p');
     meta.className = 'flip-subtitle';
+    meta.style.marginTop = 'auto';
     meta.textContent = `${habitat ? `🌿 ${habitat}` : ''}${habitat && region ? ' · ' : ''}${region ? `📍 ${region}` : ''}`;
     wrap.appendChild(meta);
   }
@@ -113,9 +114,6 @@ export function buildBack({ title, paragraphs = [], habitat, region, status, act
   if (actions.length) {
     const bar = document.createElement('div');
     bar.className = 'flip-actions';
-    bar.style.marginTop = 'auto';
-    bar.style.paddingTop = 'var(--space-3)';
-    bar.style.borderTop = '1px solid var(--color-border)';
     actions.forEach(a => {
       const btn = document.createElement('a');
       btn.href = a.href ?? '#';
@@ -123,8 +121,6 @@ export function buildBack({ title, paragraphs = [], habitat, region, status, act
       btn.textContent = a.label ?? 'Acción';
       btn.setAttribute('data-no-flip', 'true');
       if (a.target) btn.target = a.target;
-      btn.style.flex = '1';
-      btn.style.textAlign = 'center';
       bar.appendChild(btn);
     });
     wrap.appendChild(bar);

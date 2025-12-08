@@ -3,10 +3,7 @@ body {
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   color: var(--color-text);
-  background:
-    radial-gradient(1200px 600px at 10% -10%, #ffffff 0%, #f2f7fb 35%, transparent 60%),
-    radial-gradient(800px 400px at 90% 0%, #ffffff 0%, #edf4f9 40%, transparent 70%),
-    var(--color-bg);
+  background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
 }
 

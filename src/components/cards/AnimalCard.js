@@ -21,23 +21,24 @@ export function renderAnimalCard(animal, { size = 'md', glass = false } = {}) {
   const badge = makeBadge(animal.status);
   const front = buildFront({
     image: animal.image,
-    title: `${animal.name} ${animal.scientificName ? `(${animal.scientificName})` : ''}`,
-    subtitle: `Mamífero/AVES/… | ${animal.habitat ?? 'Hábitat desconocido'}`, // ajusta si tienes "type"
+    title: `${animal.name}`,
+    subtitle: `${animal.scientificName ? animal.scientificName : ''} | ${animal.habitat ?? 'Hábitat desconocido'}`,
     statusBadge: badge,
   });
 
   const paragraphs = [];
   if (animal.summary) paragraphs.push(animal.summary);
 
-  const actions = [];
-  if (animal.url) {
-    actions.push({ href: animal.url, label: 'Ver ficha', variant: '' });
-  }
+  const actions = [
+    { href: animal.url ?? '#', label: 'Aprender más', variant: 'btn-primary', target: '_blank' }
+  ];
 
   const back = buildBack({
+    title: 'Información',
     paragraphs,
     habitat: animal.habitat,
     region: animal.region,
+    status: animal.status,
     actions,
   });
 

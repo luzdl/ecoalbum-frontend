@@ -75,22 +75,42 @@ class FaunaPage {
     }
   }
 
+  // ...existing code...
   async loadSpecies() {
     this.loading = true;
     this.showLoading();
     try {
-      const res = await fetch("http://localhost:8000/fauna/fauna/");
-      if (!res.ok) throw new Error("Error al cargar especies");
-      this.species = await res.json();
+      const url = "http://localhost:8000/fauna/fauna/";
+      console.log("Fetching species from:", url);
+      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      console.log("Fetch status:", res.status, "content-type:", res.headers.get("content-type"));
+
+      const text = await res.text(); // leer como texto para debug
+      // comprobar si la respuesta parece JSON antes de parsear
+      const isJson = res.headers.get("content-type")?.includes("application/json") || /^[\[\{]/.test(text.trim());
+      if (!isJson) {
+        console.error("Respuesta no JSON recibida:", text.slice(0, 500));
+        throw new Error(`Respuesta inválida del servidor (HTTP ${res.status})`);
+      }
+
+      if (!res.ok) {
+        // intentar parsear mensaje de error si viene en JSON
+        let body;
+        try { body = JSON.parse(text); } catch (e) { body = text; }
+        throw new Error(body?.detail || `HTTP ${res.status}`);
+      }
+
+      this.species = JSON.parse(text);
       this.populateFilters();
       this.applyFilters();
     } catch (err) {
       console.error("Error:", err);
-      this.showError(err.message);
+      this.showError(err.message || "Error al cargar especies");
     } finally {
       this.loading = false;
     }
   }
+// ...existing code...
 
   populateFilters() {
     const categories = [...new Set(this.species.map((s) => s.categoria).filter(Boolean))];

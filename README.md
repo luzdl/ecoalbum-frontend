@@ -440,6 +440,177 @@ npm run build
 
 ---
 
+## 🗺️ Orden de Desarrollo Recomendado
+
+### Fase 1: Fundamentos (Paralelo) ✅
+> Estos elementos ya están creados y pueden refinarse en paralelo
+
+| Componente | Estado | Dependencias |
+|------------|--------|--------------|
+| `services/api.js` | ✅ Listo | - |
+| `services/faunaService.js` | ✅ Listo | api.js |
+| `services/floraService.js` | ✅ Listo | api.js |
+| `services/galleryService.js` | ✅ Listo | api.js |
+| `router/router.js` | ✅ Listo | - |
+| `styles/variables.css` | ⏳ Pendiente | - |
+
+### Fase 2: Componentes Base (Secuencial)
+> Crear en este orden, cada uno depende del anterior
+
+```
+1. styles/variables.css     → Define colores, fuentes, espaciados
+2. styles/reset.css         → Reset básico de estilos
+3. styles/global.css        → Estilos globales (body, containers)
+```
+
+### Fase 3: Componentes Comunes (Paralelo)
+> Estos componentes son independientes entre sí
+
+| Componente | Prioridad | Notas |
+|------------|-----------|-------|
+| `common/Loader.js` | Alta | Usado en todas las páginas |
+| `common/ErrorMessage.js` | Alta | Manejo de errores |
+| `common/Button.js` | Media | Botones reutilizables |
+
+### Fase 4: Layout (Secuencial)
+> El Layout depende de Header y Footer
+
+```
+1. layout/Header.js    → Navegación principal
+2. layout/Footer.js    → Pie de página
+3. layout/Layout.js    → Wrapper que incluye Header + Footer
+```
+
+### Fase 5: Componentes de UI (Paralelo por grupos)
+
+#### Grupo A: Tarjetas (Secuencial interno)
+```
+1. cards/FlipCard.js      → Componente base con efecto 3D
+2. cards/FlipCard.css     → Estilos del flip
+3. cards/AnimalCard.js    → Usa FlipCard + datos de fauna
+4. cards/PlantCard.js     → Usa FlipCard + datos de flora
+```
+
+#### Grupo B: Filtros (Paralelo interno)
+> Pueden desarrollarse en paralelo una vez exista FilterBar
+
+```
+1. filters/FilterBar.js       → Contenedor (crear primero)
+   ├── filters/SearchInput.js     → Paralelo
+   ├── filters/CategoryFilter.js  → Paralelo
+   ├── filters/StatusFilter.js    → Paralelo
+   └── filters/LetterFilter.js    → Paralelo
+```
+
+#### Grupo C: Galería (Secuencial)
+```
+1. gallery/GalleryItem.js   → Ítem individual
+2. gallery/Gallery.js       → Grid que usa GalleryItem
+3. gallery/Gallery.css      → Estilos del grid
+```
+
+#### Grupo D: Modal (Secuencial)
+```
+1. modal/Modal.js              → Modal base reutilizable
+2. modal/Modal.css             → Estilos y animaciones
+3. modal/SpeciesDetailModal.js → Modal específico para especies
+```
+
+#### Grupo E: Carruseles (Paralelo)
+> Independientes entre sí, pueden usar una librería externa o CSS puro
+
+```
+carousels/NewsCarousel.js      → Para noticias/destacados
+carousels/GalleryCarousel.js   → Para galería con links
+carousels/Carousel.css         → Estilos compartidos
+```
+
+### Fase 6: Páginas (Secuencial por página, paralelo entre páginas)
+
+#### HomePage (Depende de: Carruseles)
+```
+1. pages/home/HomePage.js
+2. pages/home/HomePage.css
+```
+
+#### FaunaPage (Depende de: Filtros, Gallery, Cards)
+```
+1. pages/fauna/FaunaPage.js
+2. pages/fauna/FaunaDetailPage.js  → Paralelo
+3. pages/fauna/FaunaPage.css
+```
+
+#### FloraPage (Depende de: Filtros, Gallery, Cards)
+```
+1. pages/flora/FloraPage.js
+2. pages/flora/FloraDetailPage.js  → Paralelo
+3. pages/flora/FloraPage.css
+```
+
+---
+
+## 📊 Diagrama de Dependencias
+
+```
+                    ┌─────────────────┐
+                    │   variables.css │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+         ┌────────┐    ┌──────────┐   ┌──────────┐
+         │ Loader │    │  Button  │   │  Error   │
+         └────────┘    └──────────┘   └──────────┘
+              │              │              │
+              └──────────────┼──────────────┘
+                             ▼
+                    ┌─────────────────┐
+                    │     Layout      │
+                    │ (Header+Footer) │
+                    └────────┬────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        ▼                    ▼                    ▼
+   ┌──────────┐        ┌──────────┐        ┌──────────┐
+   │ FlipCard │        │ FilterBar│        │  Modal   │
+   └────┬─────┘        └────┬─────┘        └────┬─────┘
+        │                   │                   │
+   ┌────┴────┐         ┌────┴────┐              │
+   ▼         ▼         ▼         ▼              ▼
+Animal    Plant    Search    Status    SpeciesDetail
+ Card      Card    Input    Filter        Modal
+   │         │         │         │              │
+   └────┬────┘         └────┬────┘              │
+        ▼                   ▼                   │
+   ┌──────────┐        ┌──────────┐             │
+   │ Gallery  │◄───────│  Filters │             │
+   └────┬─────┘        └──────────┘             │
+        │                                       │
+        └───────────────────┬───────────────────┘
+                            ▼
+              ┌─────────────────────────────┐
+              │          PAGES              │
+              │  HomePage │ Fauna │ Flora   │
+              └─────────────────────────────┘
+```
+
+---
+
+## ⏱️ Estimación de Tiempo por Fase
+
+| Fase | Tiempo Estimado | Desarrolladores |
+|------|-----------------|-----------------|
+| 1. Fundamentos | ✅ Completado | - |
+| 2. Estilos Base | 2-3 horas | 1 |
+| 3. Componentes Comunes | 2-3 horas | 1-2 (paralelo) |
+| 4. Layout | 3-4 horas | 1 |
+| 5. Componentes UI | 8-12 horas | 2-3 (paralelo por grupos) |
+| 6. Páginas | 6-8 horas | 2 (paralelo fauna/flora) |
+
+**Total estimado:** 20-30 horas de desarrollo
+
+---
+
 ## 📝 Notas de Implementación
 
 ### Efecto Flip de Tarjetas

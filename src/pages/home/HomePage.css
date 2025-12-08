@@ -1,0 +1,70 @@
+/* ==== Home (página principal) - estilo claro educativo ==== */
+
+.home-page {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+/* Hero con efecto glass legible */
+.hero {
+  text-align: center;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+}
+.hero__title {
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  margin-bottom: var(--space-2);
+}
+.hero__subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-4);
+}
+
+/* Navegación principal */
+.home-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Secciones */
+.home-section {
+  margin-top: var(--space-8);
+}
+.section-title {
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+/* Placeholder / mensajes */
+.carousel-placeholder {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+.load-error { color: #b42318; }
+
+/* Ajustes de variantes de botón usadas por createLink */
+.btn-primary {
+  background: linear-gradient(180deg, var(--color-primary), #347233);
+  color: #fff;
+  border: 1px solid #2d5a2740;
+}
+.btn-secondary {
+  background: #ffffff;
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+}
+.btn-secondary:hover { background: #f7fbff; }
+
+/* Responsive fino */
+@media (max-width: 640px) {
+  .home-page { padding: var(--space-4) var(--space-3); }
+}

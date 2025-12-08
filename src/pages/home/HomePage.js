@@ -7,6 +7,7 @@ import { createLink } from "../../router/router.js";
 import { mountNewsCarousel } from "../../components/carousels/NewsCarousel.js";
 import { mountGalleryCarousel } from "../../components/carousels/GalleryCarousel.js";
 import { getDestacados, getAleatorios } from "../../services/galleryService.js";
+import { createFlipCard, buildFront, buildBack } from "../../components/cards/FlipCard.js";
 import "./HomePage.css";
 
 /**
@@ -26,33 +27,9 @@ export function render(container) {
       </section>
 
       <section class="home-section">
-        <h2 class="section-title">Especies Destacadas</h2>
-        <div class="grid grid-3">
-          <article class="card card--glass elev-2">
-            <div class="card-header">
-              <h3 class="card-title">Jaguar (Panthera onca)</h3>
-              <p class="card-subtitle">Mamífero | Selva tropical</p>
-            </div>
-            <div class="badge badge-en">
-              <span class="badge-dot"></span>
-              En peligro
-            </div>
-            <p class="mt-4">
-              Felino emblemático de América. Clave en el equilibrio de la cadena trófica.
-            </p>
-          </article>
-
-          <article class="card elev-1">
-            <div class="card-header">
-              <h3 class="card-title">Perezoso</h3>
-              <p class="card-subtitle">Mamífero | Bosque húmedo</p>
-            </div>
-            <div class="badge badge-vu">
-              <span class="badge-dot"></span>
-              Vulnerable
-            </div>
-            <p class="mt-4">Mamífero arborícola de movimientos lentos.</p>
-          </article>
+        <h2 class="section-title">🌟 Especies Destacadas</h2>
+        <div id="featured-species-container" class="grid grid-3">
+          <p class="loading-text">Cargando especies destacadas...</p>
         </div>
       </section>
 
@@ -72,15 +49,81 @@ export function render(container) {
     </div>
   `;
 
-  // Cargar carruseles después de renderizar
-  loadCarousels(container);
+  // Cargar datos desde la API
+  loadHomeData(container);
 }
 
 /**
- * Carga los datos de los carruseles desde la API
+ * Mapea el estado de conservación a la clase CSS del badge
+ * @param {string} estado - Estado de conservación
+ * @returns {string} Clase CSS del badge
+ */
+function getEstadoBadgeClass(estado) {
+  if (!estado) return 'badge';
+  const estadoLower = estado.toLowerCase();
+  if (estadoLower.includes('crítico') || estadoLower.includes('cr')) return 'badge badge-cr';
+  if (estadoLower.includes('peligro') || estadoLower.includes('en')) return 'badge badge-en';
+  if (estadoLower.includes('vulnerable') || estadoLower.includes('vu')) return 'badge badge-vu';
+  if (estadoLower.includes('amenazado') || estadoLower.includes('nt')) return 'badge badge-nt';
+  if (estadoLower.includes('preocupación') || estadoLower.includes('lc')) return 'badge badge-lc';
+  return 'badge';
+}
+
+/**
+ * Genera el HTML del badge de estado
+ * @param {string} estado - Estado de conservación
+ * @returns {string} HTML del badge
+ */
+function getStatusBadgeHTML(estado) {
+  const badgeClass = getEstadoBadgeClass(estado);
+  return `<div class="${badgeClass}"><span class="badge-dot"></span>${estado || 'Sin clasificar'}</div>`;
+}
+
+/**
+ * Crea una FlipCard para una especie destacada
+ * @param {Object} especie - Datos de la especie
+ * @returns {HTMLElement} FlipCard element
+ */
+function createSpeciesFlipCard(especie) {
+  const tipoIcon = especie.tipo === 'fauna' ? '🦁' : '🌿';
+  const tipoLabel = especie.tipo === 'fauna' ? 'Fauna' : 'Flora';
+  
+  const front = buildFront({
+    image: especie.url_foto,
+    title: especie.nombre,
+    subtitle: especie.nombre_cientifico || '',
+    statusBadge: getStatusBadgeHTML(especie.estado)
+  });
+
+  const back = buildBack({
+    paragraphs: [
+      especie.descripcion_foto || `${tipoIcon} ${tipoLabel} de Panamá`,
+    ],
+    habitat: especie.tipo === 'fauna' ? 'Bosques y selvas de Panamá' : 'Ecosistemas panameños',
+    actions: [
+      {
+        label: 'Ver detalles',
+        href: `#/${especie.tipo}/${especie.especie_id}`,
+        variant: 'btn-primary'
+      }
+    ]
+  });
+
+  return createFlipCard({
+    front,
+    back,
+    size: 'md',
+    glass: true,
+    title: especie.nombre
+  });
+}
+
+/**
+ * Carga todos los datos de la página desde la API
  * @param {HTMLElement} container - Contenedor principal
  */
-async function loadCarousels(container) {
+async function loadHomeData(container) {
+  const featuredContainer = container.querySelector("#featured-species-container");
   const newsContainer = container.querySelector("#news-carousel-container");
   const galleryContainer = container.querySelector("#gallery-carousel-container");
 
@@ -89,7 +132,25 @@ async function loadCarousels(container) {
   const { signal } = ctl;
   container.__abort = () => ctl.abort();
 
-  // 1) Carrusel de noticias: Fotos destacadas con formato de noticias
+  // 1) Especies destacadas (FlipCards)
+  try {
+    const destacados = await getDestacados({ limit: 6, signal });
+    if (Array.isArray(destacados) && destacados.length > 0) {
+      featuredContainer.innerHTML = ''; // Limpiar el loading
+      destacados.forEach(especie => {
+        const flipCard = createSpeciesFlipCard(especie);
+        featuredContainer.appendChild(flipCard);
+      });
+    } else {
+      featuredContainer.innerHTML = '<p class="no-data">No hay especies destacadas disponibles</p>';
+    }
+  } catch (error) {
+    if (signal.aborted) return;
+    console.error("Error cargando especies destacadas:", error);
+    featuredContainer.innerHTML = `<p class="load-error">Error al cargar especies: ${error.message}</p>`;
+  }
+
+  // 2) Carrusel de noticias: Fotos destacadas con formato de noticias
   try {
     const destacados = await getDestacados({ limit: 5, signal });
     if (Array.isArray(destacados) && destacados.length > 0) {
@@ -115,7 +176,7 @@ async function loadCarousels(container) {
     newsContainer.innerHTML = `<p class="load-error">Error al cargar noticias: ${error.message}</p>`;
   }
 
-  // 2) Carrusel de galería: Fotos aleatorias desde la API
+  // 3) Carrusel de galería: Fotos aleatorias desde la API
   try {
     const aleatorios = await getAleatorios({ limit: 10, signal });
     if (Array.isArray(aleatorios) && aleatorios.length > 0) {

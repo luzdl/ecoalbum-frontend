@@ -3,6 +3,8 @@
  * @module router/router
  */
 
+import { mountLayout, getMainContent } from '../components/layout/Layout.js';
+
 /**
  * @typedef {Object} Route
  * @property {string} path - Patrón de ruta (soporta :param para parámetros dinámicos)
@@ -14,6 +16,18 @@
  * @property {Route} route - Ruta coincidente
  * @property {Object} params - Parámetros extraídos de la URL
  */
+
+/**
+ * API del layout montado
+ * @type {Object|null}
+ */
+let layoutApi = null;
+
+/**
+ * Indica si el layout ya fue montado
+ * @type {boolean}
+ */
+let layoutMounted = false;
 
 /**
  * Definición de rutas de la aplicación
@@ -118,10 +132,13 @@ async function renderRoute(path) {
   const targetPath = path || getCurrentPath();
   const match = matchRoute(targetPath);
   
+  // Obtener el contenedor principal (dentro del Layout)
+  let mainContent = getMainContent();
+  
   if (!match) {
     // Ruta no encontrada - mostrar 404
-    if (appContainer) {
-      appContainer.innerHTML = `
+    if (mainContent) {
+      mainContent.innerHTML = `
         <div class="not-found">
           <h1>404</h1>
           <p>Página no encontrada</p>
@@ -134,27 +151,32 @@ async function renderRoute(path) {
   
   currentRoute = match;
   
+  // Actualizar el estado activo del header
+  if (layoutApi?.updateActive) {
+    layoutApi.updateActive(targetPath);
+  }
+  
   try {
     // Mostrar loading
-    if (appContainer) {
-      appContainer.innerHTML = '<div class="loading">Cargando...</div>';
+    if (mainContent) {
+      mainContent.innerHTML = '<div class="loading">Cargando...</div>';
     }
     
     // Cargar el módulo de la página
     const module = await match.route.component();
     
-    // Renderizar la página
-    if (module.render && appContainer) {
-      await module.render(appContainer, match.params);
-    } else if (module.default?.render && appContainer) {
-      await module.default.render(appContainer, match.params);
-    } else if (typeof module.default === 'function' && appContainer) {
-      await module.default(appContainer, match.params);
+    // Renderizar la página dentro del main-content del Layout
+    if (module.render && mainContent) {
+      await module.render(mainContent, match.params);
+    } else if (module.default?.render && mainContent) {
+      await module.default.render(mainContent, match.params);
+    } else if (typeof module.default === 'function' && mainContent) {
+      await module.default(mainContent, match.params);
     }
   } catch (error) {
     console.error('Error loading page:', error);
-    if (appContainer) {
-      appContainer.innerHTML = `
+    if (mainContent) {
+      mainContent.innerHTML = `
         <div class="error">
           <h1>Error</h1>
           <p>No se pudo cargar la página</p>
@@ -238,6 +260,13 @@ export function initRouter(container) {
   if (!appContainer) {
     console.error('Router: Container not found');
     return;
+  }
+  
+  // Montar el Layout (Header + Footer) primero
+  if (!layoutMounted) {
+    const initialPath = getCurrentPath();
+    layoutApi = mountLayout(appContainer, initialPath);
+    layoutMounted = true;
   }
   
   // Escuchar cambios en el hash

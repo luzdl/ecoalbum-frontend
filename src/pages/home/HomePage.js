@@ -6,7 +6,8 @@
 import { createLink } from '../../router/router.js';
 import { mountNewsCarousel } from '../../components/carousels/NewsCarousel.js';
 import { mountGalleryCarousel } from '../../components/carousels/GalleryCorousel.js';
-import { getDestacados, getAleatorios } from '../../services/galleryService.js';
+import { getDestacados } from '../../services/galleryService.js';
+
 
 /**
  * Renderiza la página de inicio
@@ -77,37 +78,28 @@ export function render(container) {
 }
 
 /**
- * Carga los datos de los carruseles desde la API
+ * Carga los datos de los carruseles
  * @param {HTMLElement} container - Contenedor principal
  */
 async function loadCarousels(container) {
+  const newsContainer = container.querySelector('#news-carousel-container');
+  const galleryContainer = container.querySelector('#gallery-carousel-container');
+
+  // Carrusel de noticias con datos estáticos
   try {
-    // Cargar galería destacada (para noticias/featured)
-    const newsContainer = container.querySelector('#news-carousel-container');
-    const galleryContainer = container.querySelector('#gallery-carousel-container');
+    mountNewsCarousel(newsContainer, staticNewsItems, { autoplay: true, glass: true });
+  } catch (error) {
+    console.error('Error montando carrusel de noticias:', error);
+    newsContainer.innerHTML = '<p>Error al cargar noticias</p>';
+  }
 
-    // Obtener fotos destacadas para el carrusel de noticias
-    const destacados = await getDestacados({ limit: 5 });
+  // Carrusel de galería con datos de la API
+  try {
+    const destacados = await getDestacados({ limit: 10 });
     if (destacados && destacados.length > 0) {
-      const newsItems = destacados.map(foto => ({
+      const galleryItems = destacados.map(foto => ({
         title: foto.nombre,
-        excerpt: foto.descripcion_foto,
-        cover: foto.url_foto,
-        tag: foto.tipo === 'fauna' ? '🦁 Fauna' : '🌿 Flora',
-        date: new Date(),
-        href: `#/${foto.tipo}/${foto.especie_id}`,
-      }));
-      mountNewsCarousel(newsContainer, newsItems, { autoplay: true, glass: true });
-    } else {
-      newsContainer.innerHTML = '<p>No hay noticias destacadas disponibles</p>';
-    }
-
-    // Obtener fotos aleatorias para la galería
-    const aleatorios = await getAleatorios({ limit: 8 });
-    if (aleatorios && aleatorios.length > 0) {
-      const galleryItems = aleatorios.map(foto => ({
-        title: foto.nombre,
-        caption: foto.descripcion_foto,
+        caption: foto.descripcion_foto || foto.nombre_cientifico,
         cover: foto.url_foto,
         href: `#/${foto.tipo}/${foto.especie_id}`,
       }));
@@ -116,10 +108,7 @@ async function loadCarousels(container) {
       galleryContainer.innerHTML = '<p>No hay fotos disponibles</p>';
     }
   } catch (error) {
-    console.error('Error cargando carruseles:', error);
-    const newsContainer = container.querySelector('#news-carousel-container');
-    const galleryContainer = container.querySelector('#gallery-carousel-container');
-    newsContainer.innerHTML = `<p>Error al cargar noticias: ${error.message}</p>`;
+    console.error('Error cargando galería:', error);
     galleryContainer.innerHTML = `<p>Error al cargar galería: ${error.message}</p>`;
   }
 }

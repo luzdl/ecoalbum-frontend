@@ -1,17 +1,41 @@
-// ...existing code...
-
 class FaunaDetailPage {
   constructor(container) {
     this.container = container;
     this.species = null;
     this.threats = [];
     this.conservationActions = [];
+    this.categoryName = "";
   }
 
   async init(species) {
     this.species = species;
-    await this.loadThreatsAndActions();
+    await Promise.all([
+      this.loadThreatsAndActions(),
+      this.loadCategoryName()
+    ]);
     this.render();
+  }
+
+  async loadCategoryName() {
+    try {
+      const categoryId = this.species?.categoria;
+      if (!categoryId) return;
+      
+      // Si ya es un string (nombre), usarlo directamente
+      if (typeof categoryId === 'string' && isNaN(categoryId)) {
+        this.categoryName = categoryId;
+        return;
+      }
+      
+      const res = await fetch(`http://localhost:8000/api/fauna/categorias/${categoryId}/`);
+      if (res.ok) {
+        const data = await res.json();
+        this.categoryName = data.nombre || categoryId;
+      }
+    } catch (err) {
+      console.error("Error loading category:", err);
+      this.categoryName = this.species?.categoria || "";
+    }
   }
 
   async loadThreatsAndActions() {
@@ -70,7 +94,7 @@ class FaunaDetailPage {
               <img class="species-image" src="${imageUrl}" alt="${nombre_comun}" onerror="console.log('Image failed to load:', this.src)" />
               <div class="species-meta">
                 ${nombre_cientifico ? `<div class="species-row" style="font-style: italic; color: #666;">${nombre_cientifico}</div>` : ""}
-                <div class="species-row"><strong>Categoría:</strong>&nbsp;${categoria || "—"}</div>
+                <div class="species-row"><strong>Categoría:</strong>&nbsp;${this.categoryName || categoria || "—"}</div>
                 <div class="species-row"><strong>Estado:</strong>&nbsp;${estado_conservacion || "—"}</div>
                 <div class="species-description">${descripcion || "No hay descripción disponible."}</div>
                 
@@ -147,4 +171,3 @@ export default async function render(container, params = {}) {
     `;
   }
 }
-// ...existing code...

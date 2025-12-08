@@ -106,51 +106,43 @@ class FaunaPage {
   async loadSpecies() {
     this.loading = true;
     this.showLoading();
-    const candidates = [
-      "http://localhost:8000/fauna/fauna/",
-      "http://localhost:8000/fauna/fauna",
-      "http://localhost:8000/api/fauna/fauna/",
-      "http://127.0.0.1:8000/fauna/fauna/"
-    ];
-    let lastErr = null;
-    for (const url of candidates) {
-      try {
-        console.log("Trying:", url);
-        const res = await fetch(url, { headers: { Accept: "application/json" } });
-        const text = await res.text();
-        console.log("Status", res.status, "from", url);
-        if (!res.ok) {
-          console.warn("Non-ok response", res.status, url, text.slice(0,200));
-          lastErr = new Error(`HTTP ${res.status} from ${url}`);
-          continue;
+    try {
+      const url = "http://localhost:8000/api/fauna/fauna/";
+      console.log("Fetching species from:", url);
+      
+      let allSpecies = [];
+      let nextUrl = url;
+      
+      // Cargar todas las páginas
+      while (nextUrl) {
+        const res = await fetch(nextUrl, { headers: { Accept: "application/json" } });
+        console.log("Fetch status:", res.status, "from", nextUrl);
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const data = await res.json();
+        
+        // Agregar resultados de esta página
+        if (Array.isArray(data.results)) {
+          allSpecies = allSpecies.concat(data.results);
         }
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json") && !/^[\[\{]/.test(text.trim())) {
-          console.warn("Not JSON from", url, text.slice(0,200));
-          lastErr = new Error(`Not JSON from ${url}`);
-          continue;
-        }
-        const data = JSON.parse(text);
-        // normalizar a array
-        if (Array.isArray(data)) this.species = data;
-        else if (data?.results && Array.isArray(data.results)) this.species = data.results;
-        else if (data && typeof data === 'object') this.species = Object.values(data);
-        else this.species = [];
-        this.populateFilters();
-        this.applyFilters();
-        lastErr = null;
-        break;
-      } catch (err) {
-        console.error("Fetch error for", url, err);
-        lastErr = err;
+        
+        // Ir a la siguiente página si existe
+        nextUrl = data.next || null;
+        console.log("Loaded page, total so far:", allSpecies.length, "Next:", nextUrl);
       }
-    }
-    if (lastErr) {
-      console.error("All attempts failed:", lastErr);
+      
+      this.species = allSpecies;
+      console.log("Total species loaded:", this.species.length);
+      this.populateFilters();
+      this.applyFilters();
+    } catch (err) {
+      console.error("Error:", err);
       this.species = [];
-      this.showError(lastErr.message || "Error al cargar especies");
+      this.showError(err.message || "Error al cargar especies");
+    } finally {
+      this.loading = false;
     }
-    this.loading = false;
   }
 // ...existing code...
 

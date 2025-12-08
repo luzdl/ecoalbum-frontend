@@ -104,3 +104,4 @@ button:focus-visible {
 
 /* Aquí puedes agregar overrides específicos o estilos temporales si lo necesitas */
 @import "./components/cards/FlipCard.css";
+@import "./components/carousels/Carousel.css";

@@ -1,0 +1,340 @@
+/* ...existing code... */
+.fauna-page {
+  min-height: 100vh;
+  background: #fafafa;
+}
+
+.fauna-header {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  color: #fff;
+  padding: 40px 16px;
+  text-align: center;
+}
+
+.fauna-header h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.fauna-header p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.fauna-filters {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-input,
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+}
+
+.letter-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.letter-btn {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  transition: all 140ms ease;
+}
+
+.letter-btn:hover {
+  background: #f0f0f0;
+}
+
+.letter-btn.active {
+  background: #2e7d32;
+  color: #fff;
+  border-color: #2e7d32;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.gallery-item {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.gallery-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-item-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: #f4f4f4;
+  overflow: hidden;
+}
+
+.gallery-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 200ms ease;
+}
+
+.gallery-item:hover .gallery-item-image img {
+  transform: scale(1.08);
+}
+
+.gallery-item-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.gallery-item:hover .gallery-item-overlay {
+  opacity: 1;
+}
+
+.gallery-item-btn {
+  padding: 8px 16px;
+  background: #fff;
+  color: #222;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 140ms ease;
+}
+
+.gallery-item-btn:hover {
+  background: #f0f0f0;
+}
+
+.gallery-item-info {
+  padding: 12px;
+  background: #fafafa;
+}
+
+.gallery-item-name {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gallery-item-meta {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.gallery-item-category {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.gallery-item-status {
+  background: #fff3e0;
+  color: #e65100;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.fauna-loading,
+.fauna-empty,
+.fauna-error {
+  padding: 32px 16px;
+  text-align: center;
+  color: #999;
+  font-size: 1rem;
+}
+
+.fauna-error {
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: 6px;
+  margin: 16px;
+}
+
+/* Detail Page Styles */
+.fauna-detail-page {
+  min-height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.detail-modal {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 920px;
+  width: 100%;
+  max-height: 86vh;
+  overflow: auto;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  background: linear-gradient(180deg, #fafafa, #fff);
+}
+
+.detail-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #222;
+}
+
+.detail-close {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 6px 12px;
+  color: #2e7d32;
+  font-weight: 600;
+  transition: opacity 140ms ease;
+}
+
+.detail-close:hover {
+  opacity: 0.7;
+}
+
+.detail-content {
+  padding: 16px;
+}
+
+.species-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.species-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #f4f4f4;
+}
+
+.species-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.species-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.species-description {
+  margin-top: 8px;
+  line-height: 1.6;
+  color: #333;
+  font-size: 0.96rem;
+}
+
+.species-row a {
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.species-row a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .fauna-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .species-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .species-image {
+    height: 180px;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fauna-filters {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .filter-input,
+  .filter-select {
+    padding: 6px 8px;
+    font-size: 0.9rem;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 10px;
+  }
+}
+/* ...existing code... */

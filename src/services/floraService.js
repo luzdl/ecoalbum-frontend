@@ -98,11 +98,11 @@ export async function getPlantaFotos(id) {
  * const { planta, fotos } = await getPlantaCompleta(1);
  */
 export async function getPlantaCompleta(id) {
-  const [planta, fotos] = await Promise.all([
-    getPlantaById(id),
-    getPlantaFotos(id),
-  ]);
-
+  const planta = await getPlantaById(id);
+  
+  // Las fotos ya vienen en el objeto planta
+  const fotos = (planta && planta.fotos) || [];
+  
   return { planta, fotos };
 }
 

@@ -8,12 +8,38 @@ class FaunaDetailPage {
     this.species = null;
     this.threats = [];
     this.conservationActions = [];
+    this.categoryName = "";
   }
 
   async init(species) {
     this.species = species;
-    await this.loadThreatsAndActions();
+    await Promise.all([
+      this.loadThreatsAndActions(),
+      this.loadCategoryName()
+    ]);
     this.render();
+  }
+
+  async loadCategoryName() {
+    try {
+      const categoryId = this.species?.categoria;
+      if (!categoryId) return;
+      
+      // Si ya es un string (nombre), usarlo directamente
+      if (typeof categoryId === 'string' && isNaN(categoryId)) {
+        this.categoryName = categoryId;
+        return;
+      }
+      
+      const res = await fetch(`http://localhost:8000/api/fauna/categorias/${categoryId}/`);
+      if (res.ok) {
+        const data = await res.json();
+        this.categoryName = data.nombre || categoryId;
+      }
+    } catch (err) {
+      console.error("Error loading category:", err);
+      this.categoryName = this.species?.categoria || "";
+    }
   }
 
   async loadThreatsAndActions() {
@@ -71,36 +97,43 @@ class FaunaDetailPage {
     const descripcion = s.descripcion || "Sin descripción disponible.";
 
     // ------------------------------
-    // Normalizar imagen
+    // Normalizar imágenes (foto_principal + fotos del array)
     // ------------------------------
 
-    let img = "";
+    let imagenes = [];
 
-    // Caso 1: es string
-    if (typeof s.foto_principal === "string") {
-      img = s.foto_principal;
-
-    // Caso 2: es objeto con url
+    // Intentar foto_principal
+    if (typeof s.foto_principal === "string" && s.foto_principal) {
+      imagenes.push(s.foto_principal);
     } else if (s.foto_principal?.url_foto) {
-      img = s.foto_principal.url_foto;
-
+      imagenes.push(s.foto_principal.url_foto);
     } else if (s.foto_principal?.url) {
-      img = s.foto_principal.url;
-
-    } else if (s.foto_principal?.foto) {
-      img = s.foto_principal.foto;
+      imagenes.push(s.foto_principal.url);
     }
 
-    // Normalizar a URL absoluta
-    let imageUrl = img || "";
-    if (imageUrl.startsWith("/")) {
-      imageUrl = `http://localhost:8000${imageUrl}`;
-    }
-    if (!imageUrl) {
-      imageUrl = "/placeholder-species.png";
+    // Intentar array de fotos
+    if (Array.isArray(s.fotos) && s.fotos.length > 0) {
+      s.fotos.forEach((f) => {
+        const url = f.url_foto || f.url || f.foto || '';
+        if (url && !imagenes.includes(url)) {
+          imagenes.push(url);
+        }
+      });
     }
 
-    console.log("Final image URL:", imageUrl);
+    // Si no hay imágenes, usar placeholder
+    if (imagenes.length === 0) {
+      imagenes.push("/placeholder-species.png");
+    }
+
+    // Normalizar URLs a absolutas si es necesario
+    imagenes = imagenes.map((img) => {
+      if (!img) return "/placeholder-species.png";
+      if (img.startsWith("/")) return `http://localhost:8000${img}`;
+      return img;
+    });
+
+    console.log("Imágenes renderizadas:", imagenes);
 
     // ============================================================
     // Render HTML
@@ -117,6 +150,18 @@ class FaunaDetailPage {
           <div class="detail-content">
             <div class="species-grid">
               
+              <!-- Galería de imágenes -->
+              <div class="species-images">
+                ${imagenes.map((img) => `
+                  <img
+                    class="species-image"
+                    src="${img}"
+                    alt="${nombre_comun}"
+                    onerror="this.onerror=null; this.src='/placeholder-species.png'"
+                  />
+                `).join('')}
+              </div>
+
               <div class="species-meta">
 
                 ${nombre_cientifico ? `<div class="species-row" style="font-style: italic; color: #666;">${nombre_cientifico}</div>` : ""}

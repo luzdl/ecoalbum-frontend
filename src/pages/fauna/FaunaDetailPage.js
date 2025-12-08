@@ -111,19 +111,12 @@ class FaunaDetailPage {
         <div class="detail-modal">
           <div class="detail-header">
             <h2>${nombre_comun}</h2>
-            <button class="detail-close" aria-label="Volver">← Volver</button>
+            <button class="detail-close btn btn-primary" aria-label="Volver">← Volver</button>
           </div>
 
           <div class="detail-content">
             <div class="species-grid">
               
-              <img
-                class="species-image"
-                src="${imageUrl}"
-                alt="${nombre_comun}"
-                onerror="this.onerror=null; this.src='/placeholder-species.png'"
-              />
-
               <div class="species-meta">
 
                 ${nombre_cientifico ? `<div class="species-row" style="font-style: italic; color: #666;">${nombre_cientifico}</div>` : ""}

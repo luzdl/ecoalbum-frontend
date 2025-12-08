@@ -34,7 +34,7 @@ export function render(container, params) {
       </section>
       
       <nav class="detail-nav">
-        ${createLink('/flora', '← Volver a Flora', 'btn')}
+        ${createLink('/flora', '← Volver a Flora', 'btn btn-primary')}
       </nav>
     </div>
   `;
@@ -49,21 +49,6 @@ export function render(container, params) {
         const wrap = document.createElement('div');
         wrap.className = 'flora-detail-wrap';
 
-        // Fotos (simple grid/carrusel placeholder)
-        const fotosDiv = document.createElement('div');
-        fotosDiv.className = 'flora-photos';
-        if (Array.isArray(fotos) && fotos.length) {
-          fotos.forEach((f) => {
-            const img = document.createElement('img');
-            img.src = f.url_foto || f.url || '';
-            img.alt = f.descripcion || (planta && (planta.nombre_comun || planta.nombre_cientifico)) || 'Foto de planta';
-            img.className = 'flora-photo';
-            fotosDiv.appendChild(img);
-          });
-        } else {
-          fotosDiv.innerHTML = '<div class="gallery-empty">No hay fotos disponibles</div>';
-        }
-
         const info = document.createElement('div');
         info.className = 'flora-info';
         info.innerHTML = `
@@ -74,7 +59,6 @@ export function render(container, params) {
           <p><strong>Estado:</strong> ${(planta && (planta.estado_display || planta.estado)) || '—'}</p>
         `;
 
-        wrap.appendChild(fotosDiv);
         wrap.appendChild(info);
 
         root.innerHTML = '';

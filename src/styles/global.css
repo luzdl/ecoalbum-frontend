@@ -74,6 +74,11 @@ p  { color: var(--color-text-muted); line-height: 1.65; }
 .badge-en .badge-dot{ background: var(--color-en); }
 .badge-cr .badge-dot{ background: var(--color-cr); }
 
+/* Permitir que los estilos inline sobrescriban el color */
+.badge span[style*="color"] {
+  color: inherit !important;
+}
+
 /* Controles / Inputs */
 .input, select {
   background: #fff;
@@ -180,6 +185,31 @@ p  { color: var(--color-text-muted); line-height: 1.65; }
 }
 .btn-secondary:hover {
   background: #f7fbff;
+}
+
+/* Botón "Volver" más llamativo */
+.detail-close {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  background: linear-gradient(135deg, var(--color-primary), #347233);
+  color: #fff;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-2);
+}
+
+.detail-close:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-3);
+  filter: brightness(1.08);
+}
+
+.detail-close:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-1);
 }
 
 /* Tarjetas ya existen con .card; aquí solo afinamos */

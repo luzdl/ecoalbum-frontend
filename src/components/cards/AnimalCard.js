@@ -9,21 +9,41 @@ const STATUS_LABEL = {
   cr: 'Peligro crítico',
 };
 
+const STATUS_COLOR = {
+  lc: '#27ae60', // Verde
+  nt: '#f39c12', // Naranja
+  vu: '#e67e22', // Naranja oscuro
+  en: '#e74c3c', // Rojo
+  cr: '#c0392b', // Rojo oscuro
+};
+
 function showAnimalModal(animal) {
   const modal = createModal({ title: animal.name });
   
   const content = document.createElement('div');
   content.className = 'species-grid';
-  content.innerHTML = `
-    <img src="${animal.image}" alt="${animal.name}" class="species-image">
-    <div class="species-meta">
-      ${animal.scientificName ? `<div class="species-row"><strong>Científico:</strong> ${animal.scientificName}</div>` : ''}
-      <div class="species-row"><strong>Tipo:</strong> ${animal.type || 'Mamífero'}</div>
-      <div class="species-row"><strong>Hábitat:</strong> ${animal.habitat || 'Desconocido'}</div>
-      <div class="species-row"><strong>Región:</strong> ${animal.region || 'Panamá'}</div>
-      <div class="species-row"><strong>Estado:</strong> ${STATUS_LABEL[animal.status] || 'Desconocido'}</div>
-    </div>
+  
+  // Agregar imagen
+  const img = document.createElement('img');
+  img.className = 'species-image';
+  img.src = animal.image;
+  img.alt = animal.name;
+  content.appendChild(img);
+  
+  // Agregar información
+  const meta = document.createElement('div');
+  meta.className = 'species-meta';
+  const statusColor = STATUS_COLOR[animal.status] || '#666';
+  const statusText = STATUS_LABEL[animal.status] || 'Desconocido';
+  
+  meta.innerHTML = `
+    ${animal.scientificName ? `<div class="species-row"><strong>Científico:</strong> ${animal.scientificName}</div>` : ''}
+    <div class="species-row"><strong>Tipo:</strong> ${animal.type || 'Mamífero'}</div>
+    <div class="species-row"><strong>Hábitat:</strong> ${animal.habitat || 'Desconocido'}</div>
+    <div class="species-row"><strong>Región:</strong> ${animal.region || 'Panamá'}</div>
+    <div class="species-row"><strong>Estado:</strong> <span style="color: ${statusColor}; font-weight: 700;">${statusText}</span></div>
   `;
+  content.appendChild(meta);
   
   if (animal.summary) {
     const desc = document.createElement('p');
@@ -70,8 +90,9 @@ export function renderAnimalCard(animal, { size = 'md' } = {}) {
 function makeBadge(status = 'lc') {
   const cls = `badge badge-${status}`;
   const txt = STATUS_LABEL[status] ?? 'Estado';
+  const color = STATUS_COLOR[status] || '#666';
   const div = document.createElement('div');
   div.className = cls;
-  div.innerHTML = `<span class="badge-dot"></span>${txt}`;
+  div.innerHTML = `<span class="badge-dot" style="background-color: ${color} !important;"></span><span style="color: ${color} !important; font-weight: 700;">${txt}</span>`;
   return div.outerHTML;
 }

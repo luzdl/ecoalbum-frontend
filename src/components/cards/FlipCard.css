@@ -1,11 +1,13 @@
-/* Tarjeta con efecto flip 3D (accesible y responsive) */
+/* ============================================================
+   TARJETA FLIP 3D — CORREGIDA (FONDO BLANCO GARANTIZADO)
+   ============================================================ */
+
 .flip-card {
   position: relative;
   perspective: 1200px;
   width: 100%;
   height: 100%;
-  /* para layouts de grid */
-  display: block;
+  background: transparent;
 }
 
 .flip-card-inner {
@@ -13,159 +15,86 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 560ms cubic-bezier(.2,.7,.2,1);
+  transition: transform 0.6s ease;
   border-radius: var(--radius-lg);
-  overflow: clip;
 }
 
-.flip-card:focus-within .flip-card-inner,
-.flip-card.is-flipped .flip-card-inner {
+/* FLIP POR HOVER */
+.flip-card:hover .flip-card-inner {
   transform: rotateY(180deg);
 }
 
+/* ============================================================
+   CARA FRONTAL
+   ============================================================ */
 .flip-card-front {
   position: absolute;
   inset: 0;
+  background: var(--color-surface-strong);
+  border-radius: inherit;
   backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  background: var(--color-surface-strong);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-1);
-  width: 100%;
-  height: 100%;
-  z-index: 2;
 }
 
+/* ============================================================
+   CARA TRASERA (BLANCA REAL)
+   ============================================================ */
 .flip-card-back {
   position: absolute;
   inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  display: flex;
-  flex-direction: column;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-lg);
-  box-shadow: none;
-  width: 100%;
-  height: 100%;
+  background: #ffffff;   /* ✅ ESTE ES EL FONDO BLANCO REAL */
+  border-radius: inherit;
   transform: rotateY(180deg);
-}
-
-/* Variante glass opcional - solo para el frente */
-.flip-card.glass .flip-card-front {
-  background: var(--glass-bg);
-  backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
-  -webkit-backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-2);
-}
-
-/* Tamaños sugeridos */
-.flip-sm { min-height: 260px; }
-.flip-md { min-height: 320px; }
-.flip-lg { min-height: 380px; }
-
-/* Imagen de portada */
-.flip-cover {
-  aspect-ratio: 16 / 10;
-  width: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Contenido */
-.flip-body {
-  padding: var(--space-4);
+  backface-visibility: hidden;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+}
+
+/* ✅ GARANTIZA BLANCO TOTAL */
+.flip-card-back,
+.flip-card-back * {
+  background: #ffffff !important;
+  color: #000 !important;
+}
+
+/* ============================================================
+   CONTENIDO
+   ============================================================ */
+.flip-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   flex: 1;
-  width: 100%;
-  height: 100%;
-}
-
-.flip-front .flip-body {
-  justify-content: flex-end;
-  background: var(--color-surface-strong);
-  border-radius: var(--radius-lg);
-}
-
-.flip-back .flip-body {
-  justify-content: flex-start;
-  background: var(--color-surface-strong);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-1);
-}
-
-.flip-back-body {
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
 }
 
 .flip-title {
-  font-size: var(--font-size-lg);
+  font-size: 1rem;
   font-weight: 600;
-  margin: 0;
 }
 
 .flip-subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
 }
 
-.flip-meta {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-/* Footer de acciones */
 .flip-actions {
-  display: flex;
-  gap: var(--space-2);
   margin-top: auto;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border);
-}
-
-/* Botones mejorados dentro del flip */
-.flip-actions .btn {
-  flex: 1;
-  padding: 0.6rem 1rem;
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
-}
-
-.btn-primary {
-  background: linear-gradient(180deg, var(--color-primary), #347233);
-  color: #ffffff;
-  border: none;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 0.5rem;
 }
 
-.btn-primary:hover {
-  background: linear-gradient(180deg, var(--color-primary), #2a5f28);
-  filter: brightness(1.08);
+/* ============================================================
+   TAMAÑOS (TODOS LOS CARDS CON LA MISMA ALTURA)
+   ============================================================ */
+.flip-card {
+  aspect-ratio: 3 / 4;  /* Proporción consistente */
+  min-height: 360px;     /* Altura mínima igual para todos */
 }
 
-/* Accesibilidad / reducción de movimiento */
-@media (prefers-reduced-motion: reduce) {
-  .flip-card-inner { transition: none; }
-}
-
-/* Hover en desktop: opcional para demo (sigue funcionando click/teclado) */
-@media (hover: hover) and (pointer: fine) {
-  .flip-card:hover .flip-card-inner {
-    transform: rotateY(180deg);
-  }
-}
+.flip-sm { min-height: 260px; }
+.flip-md { min-height: 320px; }
+.flip-lg { min-height: 380px; }

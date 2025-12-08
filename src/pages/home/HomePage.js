@@ -53,75 +53,78 @@ export function render(container) {
   loadHomeData(container);
 }
 
-/**
- * Mapea el estado de conservación a la clase CSS del badge
- * @param {string} estado - Estado de conservación
- * @returns {string} Clase CSS del badge
- */
+/* ===========================
+   Helpers de estado/badges
+   =========================== */
+
+/** Mapea el estado a clases CSS de badge */
 function getEstadoBadgeClass(estado) {
-  if (!estado) return 'badge';
-  const estadoLower = estado.toLowerCase();
-  if (estadoLower.includes('crítico') || estadoLower.includes('cr')) return 'badge badge-cr';
-  if (estadoLower.includes('peligro') || estadoLower.includes('en')) return 'badge badge-en';
-  if (estadoLower.includes('vulnerable') || estadoLower.includes('vu')) return 'badge badge-vu';
-  if (estadoLower.includes('amenazado') || estadoLower.includes('nt')) return 'badge badge-nt';
-  if (estadoLower.includes('preocupación') || estadoLower.includes('lc')) return 'badge badge-lc';
-  return 'badge';
+  if (!estado) return "badge";
+  const s = String(estado).toLowerCase();
+  if (s.includes("cr") || s.includes("crítico")) return "badge badge-cr";
+  if (s.includes("en") || s.includes("peligro")) return "badge badge-en";
+  if (s.includes("vu") || s.includes("vulnerable")) return "badge badge-vu";
+  if (s.includes("nt") || s.includes("amenaz")) return "badge badge-nt";
+  if (s.includes("lc") || s.includes("preocupación") || s.includes("preocupacion"))
+    return "badge badge-lc";
+  return "badge";
 }
 
-/**
- * Genera el HTML del badge de estado
- * @param {string} estado - Estado de conservación
- * @returns {string} HTML del badge
- */
+/** HTML del badge de estado */
 function getStatusBadgeHTML(estado) {
-  const badgeClass = getEstadoBadgeClass(estado);
-  return `<div class="${badgeClass}"><span class="badge-dot"></span>${estado || 'Sin clasificar'}</div>`;
+  const cls = getEstadoBadgeClass(estado);
+  return `<div class="${cls}"><span class="badge-dot"></span>${estado || "Sin clasificar"}</div>`;
 }
 
-/**
- * Crea una FlipCard para una especie destacada
- * @param {Object} especie - Datos de la especie
- * @returns {HTMLElement} FlipCard element
- */
+/* ===========================
+   Construcción de FlipCards
+   =========================== */
+
+/** Crea una FlipCard (front: imagen/títulos, back: estado+descripción+acciones) */
 function createSpeciesFlipCard(especie) {
-  const tipoIcon = especie.tipo === 'fauna' ? '🦁' : '🌿';
-  const tipoLabel = especie.tipo === 'fauna' ? 'Fauna' : 'Flora';
-  
+  // FRONT — solo imagen + títulos
   const front = buildFront({
     image: especie.url_foto,
     title: especie.nombre,
-    subtitle: especie.nombre_cientifico || '',
-    statusBadge: getStatusBadgeHTML(especie.estado)
+    subtitle: especie.nombre_cientifico || "",
   });
 
+  // BACK — fondo blanco (lo da el CSS) + estado + descripción
   const back = buildBack({
+    // badge arriba
+    statusBadge: getStatusBadgeHTML(especie.estado),
+    // cuerpo de texto (si no hay, un fallback claro)
     paragraphs: [
-      especie.descripcion_foto || `${tipoIcon} ${tipoLabel} de Panamá`,
+      especie.descripcion_foto?.trim() ||
+        `Especie ${especie.tipo === "fauna" ? "de fauna" : "de flora"} registrada en Panamá.`,
     ],
-    habitat: especie.tipo === 'fauna' ? 'Bosques y selvas de Panamá' : 'Ecosistemas panameños',
+    // meta (opcional)
+    habitat: especie.habitat || (especie.tipo === "fauna" ? "Bosques y selvas de Panamá" : "Ecosistemas panameños"),
+    region: especie.region || "Panamá",
+    // acciones (además se asegura un fallback en FlipCard)
     actions: [
       {
-        label: 'Ver detalles',
+        label: "Ver detalles",
         href: `#/${especie.tipo}/${especie.especie_id}`,
-        variant: 'btn-primary'
-      }
-    ]
+        variant: "btn-primary",
+      },
+    ],
   });
 
+  // Crear FlipCard final
   return createFlipCard({
     front,
     back,
-    size: 'md',
-    glass: true,
-    title: especie.nombre
+    size: "md",
+    title: especie.nombre,
+    // el CSS ya fuerza back con fondo blanco; no usamos glass en el flip
   });
 }
 
-/**
- * Carga todos los datos de la página desde la API
- * @param {HTMLElement} container - Contenedor principal
- */
+/* ===========================
+   Carga de datos
+   =========================== */
+
 async function loadHomeData(container) {
   const featuredContainer = container.querySelector("#featured-species-container");
   const newsContainer = container.querySelector("#news-carousel-container");
@@ -132,12 +135,12 @@ async function loadHomeData(container) {
   const { signal } = ctl;
   container.__abort = () => ctl.abort();
 
-  // 1) Especies destacadas (FlipCards)
+  /* 1) Especies destacadas (FlipCards) */
   try {
     const destacados = await getDestacados({ limit: 6, signal });
     if (Array.isArray(destacados) && destacados.length > 0) {
-      featuredContainer.innerHTML = ''; // Limpiar el loading
-      destacados.forEach(especie => {
+      featuredContainer.innerHTML = "";
+      destacados.forEach((especie) => {
         const flipCard = createSpeciesFlipCard(especie);
         featuredContainer.appendChild(flipCard);
       });
@@ -150,7 +153,7 @@ async function loadHomeData(container) {
     featuredContainer.innerHTML = `<p class="load-error">Error al cargar especies: ${error.message}</p>`;
   }
 
-  // 2) Carrusel de noticias: Fotos destacadas con formato de noticias
+  /* 2) Carrusel de noticias */
   try {
     const destacados = await getDestacados({ limit: 5, signal });
     if (Array.isArray(destacados) && destacados.length > 0) {
@@ -176,7 +179,7 @@ async function loadHomeData(container) {
     newsContainer.innerHTML = `<p class="load-error">Error al cargar noticias: ${error.message}</p>`;
   }
 
-  // 3) Carrusel de galería: Fotos aleatorias desde la API
+  /* 3) Carrusel de galería */
   try {
     const aleatorios = await getAleatorios({ limit: 10, signal });
     if (Array.isArray(aleatorios) && aleatorios.length > 0) {

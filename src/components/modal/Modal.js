@@ -22,7 +22,6 @@ export function createModal({ title = '', className = '' } = {}) {
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', title || 'Modal');
-  overlay.style.display = 'none';
   
   overlay.innerHTML = `
     <div class="modal-content ${className}">
@@ -52,7 +51,7 @@ export function createModal({ title = '', className = '' } = {}) {
   function open() {
     if (isOpen) return;
     isOpen = true;
-    overlay.style.display = 'flex';
+    overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleKeydown);
     // Focus trap - enfocar el primer elemento focusable
@@ -62,7 +61,7 @@ export function createModal({ title = '', className = '' } = {}) {
   function close() {
     if (!isOpen) return;
     isOpen = false;
-    overlay.style.display = 'none';
+    overlay.classList.remove('active');
     document.body.style.overflow = '';
     document.removeEventListener('keydown', handleKeydown);
     onCloseCallback();

@@ -97,36 +97,43 @@ class FaunaDetailPage {
     const descripcion = s.descripcion || "Sin descripción disponible.";
 
     // ------------------------------
-    // Normalizar imagen
+    // Normalizar imágenes (foto_principal + fotos del array)
     // ------------------------------
 
-    let img = "";
+    let imagenes = [];
 
-    // Caso 1: es string
-    if (typeof s.foto_principal === "string") {
-      img = s.foto_principal;
-
-    // Caso 2: es objeto con url
+    // Intentar foto_principal
+    if (typeof s.foto_principal === "string" && s.foto_principal) {
+      imagenes.push(s.foto_principal);
     } else if (s.foto_principal?.url_foto) {
-      img = s.foto_principal.url_foto;
-
+      imagenes.push(s.foto_principal.url_foto);
     } else if (s.foto_principal?.url) {
-      img = s.foto_principal.url;
-
-    } else if (s.foto_principal?.foto) {
-      img = s.foto_principal.foto;
+      imagenes.push(s.foto_principal.url);
     }
 
-    // Normalizar a URL absoluta
-    let imageUrl = img || "";
-    if (imageUrl.startsWith("/")) {
-      imageUrl = `http://localhost:8000${imageUrl}`;
-    }
-    if (!imageUrl) {
-      imageUrl = "/placeholder-species.png";
+    // Intentar array de fotos
+    if (Array.isArray(s.fotos) && s.fotos.length > 0) {
+      s.fotos.forEach((f) => {
+        const url = f.url_foto || f.url || f.foto || '';
+        if (url && !imagenes.includes(url)) {
+          imagenes.push(url);
+        }
+      });
     }
 
-    console.log("Final image URL:", imageUrl);
+    // Si no hay imágenes, usar placeholder
+    if (imagenes.length === 0) {
+      imagenes.push("/placeholder-species.png");
+    }
+
+    // Normalizar URLs a absolutas si es necesario
+    imagenes = imagenes.map((img) => {
+      if (!img) return "/placeholder-species.png";
+      if (img.startsWith("/")) return `http://localhost:8000${img}`;
+      return img;
+    });
+
+    console.log("Imágenes renderizadas:", imagenes);
 
     // ============================================================
     // Render HTML
@@ -143,12 +150,17 @@ class FaunaDetailPage {
           <div class="detail-content">
             <div class="species-grid">
               
-              <img
-                class="species-image"
-                src="${imageUrl}"
-                alt="${nombre_comun}"
-                onerror="this.onerror=null; this.src='/placeholder-species.png'"
-              />
+              <!-- Galería de imágenes -->
+              <div class="species-images">
+                ${imagenes.map((img) => `
+                  <img
+                    class="species-image"
+                    src="${img}"
+                    alt="${nombre_comun}"
+                    onerror="this.onerror=null; this.src='/placeholder-species.png'"
+                  />
+                `).join('')}
+              </div>
 
               <div class="species-meta">
 

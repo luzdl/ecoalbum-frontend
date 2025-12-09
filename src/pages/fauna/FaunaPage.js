@@ -225,7 +225,20 @@ class FaunaPage {
     }
 
     const letterDiv = document.getElementById("letter-filter");
-    letterDiv.innerHTML = `<button class="letter-btn active" data-letter="">Todas</button>`;
+    // Crear botón 'Todas' como elemento y agregar listener para resetear el filtro
+    letterDiv.innerHTML = '';
+    const todasBtn = document.createElement('button');
+    todasBtn.className = 'letter-btn active';
+    todasBtn.textContent = 'Todas';
+    todasBtn.dataset.letter = '';
+    todasBtn.addEventListener('click', () => {
+      document.querySelectorAll('.letter-btn').forEach((b) => b.classList.remove('active'));
+      todasBtn.classList.add('active');
+      this.filters.letter = '';
+      this.applyFilters();
+    });
+    letterDiv.appendChild(todasBtn);
+
     for (let i = 65; i <= 90; i++) {
       const letter = String.fromCharCode(i);
       const btn = document.createElement("button");

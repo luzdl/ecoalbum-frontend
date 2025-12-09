@@ -54,7 +54,6 @@ class FloraPage {
         </header>
 
         <div class="flora-filters">
-          <input type="search" id="search-input" class="filter-input" placeholder="Buscar planta..." aria-label="Buscar" />
           <select id="estado-filter" class="filter-select" aria-label="Filtrar por estado">
             <option value="">Estado</option>
           </select>
@@ -72,15 +71,8 @@ class FloraPage {
   }
 
   attachEvents() {
-    const searchInput = document.getElementById('search-input');
     const estadoSelect = document.getElementById('estado-filter');
-
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        this.filters.query = e.target.value || '';
-        this.applyFilters();
-      });
-    }
+    // search removed per UX request
 
 
     if (estadoSelect) {

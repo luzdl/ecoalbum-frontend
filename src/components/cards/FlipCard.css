@@ -26,6 +26,19 @@
   transform: rotateY(180deg);
 }
 
+/* Support programmatic flip via class toggle */
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* When flipped, ensure the back face sits above the front so actions remain clickable */
+.flip-card.is-flipped .flip-card-back {
+  z-index: 4;
+}
+.flip-card.is-flipped .flip-card-front {
+  z-index: 2;
+}
+
 /* ============================================================
    CARA FRONTAL
    ============================================================ */

@@ -257,6 +257,10 @@
   transition: transform .15s ease, box-shadow .15s ease;
 }
 
+/* Keep flip-cards consistent height inside gallery items */
+.gallery-item { min-height: 380px; }
+.gallery-item > .flip-card, .gallery-item .flip-card { height: 100%; }
+
 .gallery-item:hover{
   transform: translateY(-4px);
   box-shadow: 0 6px 18px rgba(0,0,0,.08);

@@ -56,13 +56,6 @@ class FaunaPage {
         </header>
         
         <div class="fauna-filters">
-          <input 
-            type="search" 
-            id="search-input" 
-            class="filter-input" 
-            placeholder="Buscar especie..."
-            aria-label="Buscar"
-          />
           <select id="category-filter" class="filter-select" aria-label="Filtrar por categoría">
             <option value="">Categoría</option>
           </select>
@@ -82,16 +75,9 @@ class FaunaPage {
   }
 
   attachEvents() {
-    const searchInput = document.getElementById("search-input");
     const categoryFilter = document.getElementById("category-filter");
     const statusFilter = document.getElementById("status-filter");
-
-    if (searchInput) {
-      searchInput.addEventListener("input", (e) => {
-        this.filters.query = e.target.value;
-        this.applyFilters();
-      });
-    }
+    // search input removed per UX request
 
     if (categoryFilter) {
       categoryFilter.addEventListener("change", (e) => {
@@ -101,14 +87,10 @@ class FaunaPage {
     }
 
     if (statusFilter) {
-      statusFilter.addEventListener("change", async (e) => {
+      // Use client-side filtering like Flora: set filter and re-apply
+      statusFilter.addEventListener("change", (e) => {
         this.filters.status = e.target.value;
-        // Si hay un estado seleccionado, recarga desde la API con el query param
-          if (this.filters.status) {
-            await this.loadSpeciesWithStatus(this.filters.status);
-          } else {
-            await this.loadSpecies();
-          }
+        this.applyFilters();
       });
     }
   }

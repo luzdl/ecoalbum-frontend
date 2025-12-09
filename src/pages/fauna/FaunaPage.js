@@ -1,5 +1,21 @@
 // ...existing code...
 
+const STATUS_LABEL = {
+  lc: 'Preocupación menor',
+  nt: 'Casi amenazado',
+  vu: 'Vulnerable',
+  en: 'En peligro',
+  cr: 'Peligro crítico',
+};
+
+const STATUS_COLOR = {
+  lc: '#27ae60', // Verde
+  nt: '#f39c12', // Naranja
+  vu: '#e67e22', // Naranja oscuro
+  en: '#e74c3c', // Rojo
+  cr: '#c0392b', // Rojo oscuro
+};
+
 class FaunaPage {
   constructor(container) {
     this.container = container;
@@ -70,9 +86,14 @@ class FaunaPage {
     }
 
     if (statusFilter) {
-      statusFilter.addEventListener("change", (e) => {
+      statusFilter.addEventListener("change", async (e) => {
         this.filters.status = e.target.value;
-        this.applyFilters();
+        // Si hay un estado seleccionado, recarga desde la API con el query param
+        if (this.filters.status) {
+          await this.loadSpeciesWithStatus(this.filters.status);
+        } else {
+          await this.loadSpecies();
+        }
       });
     }
   }
@@ -144,32 +165,53 @@ class FaunaPage {
       this.loading = false;
     }
   }
-// ...existing code...
+
+  async loadSpeciesWithStatus(statusKey) {
+    this.loading = true;
+    this.showLoading();
+    try {
+      const url = `http://localhost:8000/api/fauna/fauna/?estado=${encodeURIComponent(statusKey)}`;
+      let allSpecies = [];
+      let nextUrl = url;
+      while (nextUrl) {
+        const res = await fetch(nextUrl, { headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (Array.isArray(data.results)) {
+          allSpecies = allSpecies.concat(data.results);
+        }
+        nextUrl = data.next || null;
+      }
+      this.species = allSpecies;
+      this.applyFilters();
+    } catch (err) {
+      this.species = [];
+      this.showError(err.message || "Error al cargar especies");
+    } finally {
+      this.loading = false;
+    }
+  }
 
   populateFilters() {
-    // Usar las categorías cargadas del API
-    const statuses = [...new Set(this.species.map((s) => s.estado_conservacion).filter(Boolean))];
-
     const catSelect = document.getElementById("category-filter");
-    // Limpiar opciones existentes excepto la primera
     catSelect.innerHTML = '<option value="">Categoría</option>';
-    
-    // Agregar categorías del API
     this.categories.forEach((cat) => {
       const opt = document.createElement("option");
-      opt.value = cat.id; // Usar ID como valor para filtrar
-      opt.textContent = cat.nombre; // Mostrar nombre en el dropdown
+      opt.value = cat.id;
+      opt.textContent = cat.nombre;
       catSelect.appendChild(opt);
     });
 
-    const statSelect = document.getElementById("status-filter");
-    statSelect.innerHTML = '<option value="">Estado</option>';
-    statuses.forEach((st) => {
-      const opt = document.createElement("option");
-      opt.value = st;
-      opt.textContent = st;
+    // SOLO usar los estados hardcodeados, nunca extraer de species ni de API
+    const statSelect = document.getElementById('status-filter');
+    statSelect.innerHTML = `<option value="">Estado</option>`;
+    for (const [key, label] of Object.entries(STATUS_LABEL)) {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = label;
+      opt.style.color = STATUS_COLOR[key];
       statSelect.appendChild(opt);
-    });
+    }
 
     const letterDiv = document.getElementById("letter-filter");
     letterDiv.innerHTML = `<button class="letter-btn active" data-letter="">Todas</button>`;
@@ -196,7 +238,9 @@ class FaunaPage {
       const matchCategory = !this.filters.category || 
         String(s.categoria) === String(this.filters.category) || 
         s.categoria === parseInt(this.filters.category);
-      const matchStatus = !this.filters.status || s.estado_conservacion === this.filters.status;
+      // Comparar estado por código (lc, nt, vu, en, cr) - el campo estado contiene "(LC)", "(NT)", etc.
+      const matchStatus = !this.filters.status || 
+        (s.estado && s.estado.toLowerCase().includes(`(${this.filters.status})`));
       const matchLetter = !this.filters.letter || s.nombre_comun?.toUpperCase().startsWith(this.filters.letter);
       return matchQuery && matchCategory && matchStatus && matchLetter;
     });
@@ -234,7 +278,13 @@ class FaunaPage {
           <h3 class="gallery-item-name">${s.nombre_comun || "Sin nombre"}</h3>
           <p class="gallery-item-meta">
             <span class="gallery-item-category">${this.getCategoryName(s.categoria)}</span>
-            ${s.estado_conservacion ? `<span class="gallery-item-status">${s.estado_conservacion}</span>` : ""}
+            ${s.estado ? (() => {
+              const code = (s.estado.match(/\(([a-zA-Z]{2})\)/) || [])[1]?.toLowerCase();
+              if (code && STATUS_LABEL[code]) {
+                return `<span class=\"gallery-item-status\" style=\"background:${STATUS_COLOR[code]}22;color:${STATUS_COLOR[code]}\">${STATUS_LABEL[code]} (${code.toUpperCase()})</span>`;
+              }
+              return `<span class=\"gallery-item-status\">${s.estado}</span>`;
+            })() : ""}
           </p>
         </div>
       </div>

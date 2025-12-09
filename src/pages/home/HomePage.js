@@ -102,10 +102,10 @@ function createSpeciesFlipCard(especie) {
     habitat: especie.habitat || (especie.tipo === "fauna" ? "Bosques y selvas de Panamá" : "Ecosistemas panameños"),
     region: especie.region || "Panamá",
     // acciones (además se asegura un fallback en FlipCard)
-    actions: [
+      actions: [
       {
         label: "Ver detalles",
-        href: `#/${especie.tipo}/${especie.especie_id}`,
+        href: `#/${especie.tipo}/${especie.especie_id}?from=home`,
         variant: "btn-primary",
       },
     ],
@@ -163,7 +163,7 @@ async function loadHomeData(container) {
         cover: foto.url_foto,
         tag: foto.tipo === "fauna" ? "🦁 Fauna" : "🌿 Flora",
         date: new Date(),
-        href: `#/${foto.tipo}/${foto.especie_id}`,
+        href: `#/${foto.tipo}/${foto.especie_id}?from=home`,
       }));
       mountNewsCarousel(newsContainer, newsItems, {
         autoplay: true,
@@ -187,7 +187,7 @@ async function loadHomeData(container) {
         title: foto.nombre,
         caption: foto.descripcion_foto || foto.nombre_cientifico,
         cover: foto.url_foto,
-        href: `#/${foto.tipo}/${foto.especie_id}`,
+        href: `#/${foto.tipo}/${foto.especie_id}?from=home`,
       }));
       mountGalleryCarousel(galleryContainer, galleryItems, {
         autoplay: false,

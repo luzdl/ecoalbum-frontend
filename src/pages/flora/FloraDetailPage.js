@@ -15,6 +15,9 @@ import '../../components/gallery/Gallery.css';
  */
 export function render(container, params) {
   const { id } = params;
+  // Determinar link de volver: si se vino desde home (hash contiene from=home) volver a '/'
+  const hash = window.location.hash || '';
+  const backHref = hash.includes('from=home') ? '/' : '/flora';
   
   container.innerHTML = `
     <div class="flora-detail-page">
@@ -34,7 +37,7 @@ export function render(container, params) {
       </section>
       
       <nav class="detail-nav">
-        ${createLink('/flora', '← Volver a Flora', 'btn btn-primary')}
+        ${createLink(backHref, backHref === '/' ? '← Volver al inicio' : '← Volver a Flora', 'btn btn-primary')}
       </nav>
     </div>
   `;

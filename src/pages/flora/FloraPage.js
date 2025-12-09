@@ -8,6 +8,22 @@ import { getPlantas, ESTADOS_CONSERVACION } from '../../services/floraService.js
 import { createFilterBar } from '../../components/filters/FilterBar.js';
 import { loadGallery } from '../../components/gallery/Gallery.js';
 
+const STATUS_LABEL = {
+  lc: 'Preocupación menor',
+  nt: 'Casi amenazado',
+  vu: 'Vulnerable',
+  en: 'En peligro',
+  cr: 'Peligro crítico',
+};
+
+const STATUS_COLOR = {
+  lc: '#27ae60', // Verde
+  nt: '#f39c12', // Naranja
+  vu: '#e67e22', // Naranja oscuro
+  en: '#e74c3c', // Rojo
+  cr: '#c0392b', // Rojo oscuro
+};
+
 /**
  * FloraPage - integra FilterBar + Gallery + PlantCard (FlipCard)
  * Usa `getPlantas` como fetchFn para `loadGallery`
@@ -17,7 +33,7 @@ class FloraPage {
     this.container = container;
     this.plantas = [];
     this.filtered = [];
-    this.filters = { query: '', familia: '', estado: '', letter: '' };
+    this.filters = { query: '', estado: '', letter: '' };
     this.loading = false;
   }
 
@@ -37,9 +53,7 @@ class FloraPage {
 
         <div class="flora-filters">
           <input type="search" id="search-input" class="filter-input" placeholder="Buscar planta..." aria-label="Buscar" />
-          <select id="familia-filter" class="filter-select" aria-label="Filtrar por familia">
-            <option value="">Familia</option>
-          </select>
+          <!-- filtro de familia eliminado porque no hay datos disponibles -->
           <select id="estado-filter" class="filter-select" aria-label="Filtrar por estado">
             <option value="">Estado</option>
           </select>
@@ -58,7 +72,6 @@ class FloraPage {
 
   attachEvents() {
     const searchInput = document.getElementById('search-input');
-    const familiaSelect = document.getElementById('familia-filter');
     const estadoSelect = document.getElementById('estado-filter');
 
     if (searchInput) {
@@ -68,12 +81,6 @@ class FloraPage {
       });
     }
 
-    if (familiaSelect) {
-      familiaSelect.addEventListener('change', (e) => {
-        this.filters.familia = e.target.value;
-        this.applyFilters();
-      });
-    }
 
     if (estadoSelect) {
       estadoSelect.addEventListener('change', (e) => {
@@ -109,36 +116,16 @@ class FloraPage {
   }
 
   populateFilters() {
-    const familias = [...new Set(this.plantas.map((p) => p.familia).filter(Boolean))];
-    const estados = [...new Set(this.plantas.map((p) => p.estado || p.estado_conservacion).filter(Boolean))];
-
-    const famSelect = document.getElementById('familia-filter');
-    famSelect.innerHTML = `<option value="">Familia</option>`;
-    familias.forEach((f) => {
-      const opt = document.createElement('option');
-      opt.value = f;
-      opt.textContent = f;
-      famSelect.appendChild(opt);
-    });
-
+    // Usar estados hardcodeados
     const estSelect = document.getElementById('estado-filter');
     estSelect.innerHTML = `<option value="">Estado</option>`;
-    // preferir la lista proporcionada por el servicio si existe
-    if (Array.isArray(ESTADOS_CONSERVACION) && ESTADOS_CONSERVACION.length) {
-      ESTADOS_CONSERVACION.forEach((s) => {
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = s;
-        estSelect.appendChild(opt);
-      });
-    } else {
-      estados.forEach((s) => {
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = s;
-        estSelect.appendChild(opt);
-      });
-    }
+    Object.entries(STATUS_LABEL).forEach(([key, label]) => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = label;
+      opt.style.color = STATUS_COLOR[key];
+      estSelect.appendChild(opt);
+    });
 
     const letterDiv = document.getElementById('letter-filter');
     letterDiv.innerHTML = `<button class="letter-btn active" data-letter="">Todas</button>`;
@@ -162,11 +149,13 @@ class FloraPage {
     this.filtered = this.plantas.filter((p) => {
       const name = p.nombre_comun || p.nombre_cientifico || '';
       const matchQuery = !this.filters.query || name.toLowerCase().includes(this.filters.query.toLowerCase());
-      const matchFamilia = !this.filters.familia || p.familia === this.filters.familia;
+      // Ya no filtramos por familia (no hay datos de familias fiables)
+      // Comparar estado por código (lc, nt, vu, en, cr) - el campo estado contiene "(LC)", "(VU)", etc.
       const estadoField = p.estado || p.estado_conservacion || '';
-      const matchEstado = !this.filters.estado || estadoField === this.filters.estado;
+      const matchEstado = !this.filters.estado || 
+        (estadoField && estadoField.toLowerCase().includes(`(${this.filters.estado})`));
       const matchLetter = !this.filters.letter || name.toUpperCase().startsWith(this.filters.letter);
-      return matchQuery && matchFamilia && matchEstado && matchLetter;
+      return matchQuery && matchEstado && matchLetter;
     });
 
     this.renderGallery();

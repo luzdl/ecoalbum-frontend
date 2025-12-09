@@ -222,11 +222,16 @@ class FaunaDetailPage {
       </div>
     `;
 
-    // botón volver
+    // botón volver: si la URL contiene ?from=home volver al inicio, si no volver a /fauna
     const closeBtn = document.querySelector(".detail-close");
     if (closeBtn) {
       closeBtn.addEventListener("click", () => {
-        window.location.hash = "/fauna";
+        const hash = window.location.hash || '';
+        if (hash.includes('from=home')) {
+          window.location.hash = '/';
+        } else {
+          window.location.hash = '/fauna';
+        }
       });
     }
   }
@@ -256,7 +261,7 @@ export default async function render(container, params = {}) {
       <div class="error">
         <h1>Error</h1>
         <p>${err.message}</p>
-        <a href="#/fauna">Volver a Fauna</a>
+        <a href="${(window.location.hash||'').includes('from=home') ? '#/' : '#/fauna'}">Volver</a>
       </div>
     `;
   }

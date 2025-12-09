@@ -88,11 +88,11 @@ class FaunaDetailPage {
         ? s.categoria
         : s.categoria?.nombre || "—";
 
-    // Normalizar estado
+    // Normalizar estado: aceptar varias formas que venga desde la API
     const estado_conservacion =
-      typeof s.estado_conservacion === "string"
-        ? s.estado_conservacion
-        : s.estado_conservacion?.nombre || "—";
+      (s.estado_conservacion && (typeof s.estado_conservacion === 'string' ? s.estado_conservacion : s.estado_conservacion.nombre))
+      || (s.estado && (typeof s.estado === 'string' ? s.estado : s.estado.nombre))
+      || '—';
 
     const descripcion = s.descripcion || "Sin descripción disponible.";
 
@@ -167,57 +167,36 @@ class FaunaDetailPage {
               </div>
 
               <div class="species-meta">
-
-                ${nombre_cientifico ? `<div class="species-row" style="font-style: italic; color: #666;">${nombre_cientifico}</div>` : ""}
-
-                <div class="species-row">
-                  <strong>Categoría:</strong> ${categoria}
-                </div>
-
-                <div class="species-row">
-                  <strong>Estado:</strong> ${estado_conservacion}
+                <div class="species-quick">
+                  ${nombre_cientifico ? `<div class="quick-item"><strong>Nombre científico:</strong> <div class="quick-value" style="font-style:italic;color:#666;">${nombre_cientifico}</div></div>` : ''}
+                  <div class="quick-item"><strong>Categoría:</strong> <div class="quick-value">${categoria}</div></div>
+                  <div class="quick-item"><strong>Estado:</strong> <div class="quick-value">${estado_conservacion}</div></div>
                 </div>
 
                 <div class="species-description">${descripcion}</div>
 
                 <!-- AMENAZAS -->
-                ${
-                  this.threats.length > 0
-                    ? `
+                ${this.threats.length > 0 ? `
                   <div class="species-section">
                     <h3>Amenazas</h3>
                     <ul class="threats-list">
-                      ${this.threats
-                        .map(
-                          (t) => `
+                      ${this.threats.map((t) => `
                         <li>
                           <strong>${t.nombre}</strong>
                           <p>${t.descripcion || ""}</p>
-                        </li>`
-                        )
-                        .join("")}
+                        </li>`).join("")}
                     </ul>
-                  </div>`
-                    : ""
-                }
+                  </div>` : ''}
 
                 <!-- ACCIONES DE CONSERVACIÓN -->
-                ${
-                  this.conservationActions.length > 0
-                    ? `
+                ${this.conservationActions.length > 0 ? `
                   <div class="species-section">
                     <h3>Acciones de Conservación</h3>
-                    <ol class="actions-list" style="list-style-type: decimal; padding-left: 20px;">
-                      ${this.conservationActions
-                        .map(
-                          (a) => `
-                        <li>${a.descripcion || a.nombre || "Acción"}</li>`
-                        )
-                        .join("")}
+                    <ol class="actions-list">
+                      ${this.conservationActions.map((a) => `
+                        <li>${a.descripcion || a.nombre || "Acción"}</li>`).join("")}
                     </ol>
-                  </div>`
-                    : ""
-                }
+                  </div>` : ''}
 
               </div>
             </div>

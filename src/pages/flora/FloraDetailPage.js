@@ -61,10 +61,16 @@ export function render(container, params) {
         const info = document.createElement('div');
         info.className = 'species-meta';
         info.innerHTML = `
-          <div style="font-style:italic;color:#666;">${planta?.nombre_cientifico || ''}</div>
           <h2>${planta?.nombre_comun || 'Sin nombre'}</h2>
-          <div class="species-row"><strong>Estado:</strong> ${planta?.estado_display || planta?.estado || '—'}</div>
-          <div class="species-description">${planta?.distribucion || planta?.descripcion || 'Sin descripción.'}</div>
+          <div class="species-quick">
+            ${planta?.nombre_cientifico ? `<div class="quick-item"><strong>Nombre científico:</strong><div class="quick-value" style="font-style:italic;color:#666;">${planta.nombre_cientifico}</div></div>` : ''}
+            <div class="quick-item"><strong>Estado (raw):</strong><div class="quick-value">${planta?.estado || '—'}</div></div>
+            <div class="quick-item"><strong>Estado (display):</strong><div class="quick-value">${planta?.estado_display || '—'}</div></div>
+          </div>
+          <div class="species-row"><strong>Distribución:</strong> ${planta?.distribucion || '—'}</div>
+          <div class="species-row"><strong>Descripción:</strong>
+            <div class="species-description">${planta?.descripcion || 'Sin descripción.'}</div>
+          </div>
         `;
 
         wrap.innerHTML = '';

@@ -1,85 +1,155 @@
 /* ...existing code... */
 .fauna-page {
   min-height: 100vh;
-  background: #fafafa;
+  background: linear-gradient(180deg, #f0f7f4 0%, #ffffff 100%);
 }
 
-.fauna-header {
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
-  color: #fff;
-  padding: 40px 16px;
-  text-align: center;
+.fauna-header,
+.flora-header {
+  /* Consistent brand green header */
+  margin: 16px;
+  padding: 20px 22px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(11,60,27,0.24);
+  backdrop-filter: blur(6px) saturate(1.05);
+  -webkit-backdrop-filter: blur(6px) saturate(1.05);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.fauna-header h1 {
-  margin: 0 0 8px;
+.page-header {
+  padding: 18px 22px;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fauna-header h1,
+.flora-header h1 {
+  margin: 0;
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.18);
 }
 
-.fauna-header p {
+.fauna-header p,
+.flora-header p {
   margin: 0;
   font-size: 1rem;
-  opacity: 0.9;
+  color: rgba(255,255,255,0.95);
 }
 
 .fauna-filters {
   display: flex;
   gap: 12px;
   padding: 16px;
+  margin: 0 16px 16px;
   background: #fff;
-  border-bottom: 1px solid #eee;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   flex-wrap: wrap;
   align-items: center;
 }
 
 .filter-input,
 .filter-select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  background: #fff;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: #fafafa;
+  min-width: 180px;
+  transition: all 200ms ease;
+}
+
+.filter-input {
+  min-width: 250px;
 }
 
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
   border-color: #2e7d32;
-  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.12);
+}
+
+.filter-input::placeholder {
+  color: #999;
+}
+
+.filter-select {
+  cursor: pointer;
 }
 
 .letter-filter {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  border-radius: 12px;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .letter-btn {
-  padding: 6px 10px;
-  border: 1px solid #ddd;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid rgba(0,0,0,0.06);
   background: #fff;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 50%;
   font-size: 0.85rem;
-  transition: all 140ms ease;
+  font-weight: 600;
+  color: #4b5563;
+  transition: transform 160ms ease, box-shadow 160ms ease, bg 160ms ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .letter-btn:hover {
-  background: #f0f0f0;
+  background: #f1fbf6;
+  color: #2e7d32;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 'Todas' pill (data-letter="") */
+.letter-btn[data-letter=""]{
+  min-width: 68px;
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 0.9rem;
 }
 
 .letter-btn.active {
-  background: #2e7d32;
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
   color: #fff;
-  border-color: #2e7d32;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(46,125,50,0.28);
+  border-color: transparent;
 }
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-  padding: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px; /* más espacio entre tarjetas */
+  padding: 20px;
 }
 
 .gallery-item {
@@ -90,6 +160,10 @@
   cursor: pointer;
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
+
+/* Ensure flip-card fills the gallery item and items have consistent height */
+.gallery-item { min-height: 380px; }
+.gallery-item > .flip-card, .gallery-item .flip-card { height: 100%; }
 
 .gallery-item:hover {
   transform: translateY(-4px);
@@ -203,21 +277,25 @@
 /* Detail Page Styles */
 .fauna-detail-page {
   min-height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  /* Soft green liquid-glass overlay behind the modal */
+  background: linear-gradient(180deg, rgba(22, 80, 40, 0.12), rgba(18, 70, 36, 0.08));
+  backdrop-filter: blur(6px) saturate(1.05);
+  -webkit-backdrop-filter: blur(6px) saturate(1.05);
 }
 
 .detail-modal {
   background: #fff;
-  border-radius: 8px;
-  max-width: 920px;
-  width: 100%;
-  max-height: 86vh;
-  overflow: auto;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  /* Hacer la tarjeta más ancha para mostrar más información */
+  max-width: 1400px;
+  width: min(98vw, 1400px);
+  max-height: 92vh;
+  overflow: hidden; /* el contenido interno manejará el scroll */
+  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.32);
 }
 
 .detail-header {
@@ -251,8 +329,27 @@
 }
 
 .detail-content {
-  padding: 16px;
+  padding: 20px;
+  /* make content scrollable while keeping header visible */
+  max-height: calc(92vh - 84px);
+  overflow-y: auto;
 }
+
+/* hide default scrollbar but keep scroll functionality */
+.detail-content::-webkit-scrollbar { width: 10px; }
+.detail-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
+.detail-content { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.08) transparent; }
+
+.species-quick {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.quick-item { display:flex; flex-direction:column; min-width: 160px; }
+.quick-item .quick-value { margin-top:6px; color: #555; }
+.species-description { margin-top: 14px; color: #444; line-height:1.6; }
 
 .species-grid {
   display: grid;
@@ -276,33 +373,75 @@
   width: 100%;
 }
 
-.species-images img {
+.species-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr; /* imagen más ancha */
+  gap: 24px;
+  align-items: start;
+}
+.species-image {
   width: 100%;
-  height: 240px;
+  height: 320px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #f4f4f4;
 }
-
-.species-meta {
+.species-images {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  width: 100%;
+}
+.species-images img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f4f4f4;
+  font-size: 0.96rem;
+}
+  
+
+
+/* Paper stack animations */
+@keyframes stackIn {
+  0% { transform: translateY(20px) rotate(-2deg) scale(0.98); opacity: 0; }
+  100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+}
+@keyframes stackOutNext {
+  0% { transform: translateX(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateX(-40%) rotate(-8deg) scale(0.96); opacity: 0; }
+}
+@keyframes stackOutPrev {
+  0% { transform: translateX(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateX(40%) rotate(8deg) scale(0.96); opacity: 0; }
 }
 
-.species-row {
+.detail-modal.stack-enter {
+  animation: stackIn 360ms cubic-bezier(.2,.9,.3,1) both;
+}
+.detail-modal.stack-exit-next {
+  animation: stackOutNext 360ms cubic-bezier(.2,.9,.3,1) both;
+}
+.detail-modal.stack-exit-prev {
+  animation: stackOutPrev 360ms cubic-bezier(.2,.9,.3,1) both;
+}
+
+/* Header controls layout */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+}
+.detail-header .controls {
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 0.95rem;
-  color: #444;
 }
-
-.species-description {
-  margin-top: 8px;
-  line-height: 1.6;
-  color: #333;
-  font-size: 0.96rem;
+.detail-header .controls .btn {
+  padding: 0.55rem 0.9rem;
 }
 
 .species-row a {

@@ -15,27 +15,25 @@ import '../../components/gallery/Gallery.css';
  */
 export function render(container, params) {
   const { id } = params;
+  // Determinar link de volver: si se vino desde home (hash contiene from=home) volver a '/'
+  const hash = window.location.hash || '';
+  const backHref = hash.includes('from=home') ? '/' : '/flora';
   
   container.innerHTML = `
     <div class="flora-detail-page">
-      <header class="page-header">
-        <nav class="breadcrumb">
-          ${createLink('/', 'Inicio')} / 
-          ${createLink('/flora', 'Flora')} / 
-          <span>Detalle</span>
-        </nav>
-        <h1>🌺 Detalle de la Planta #${id}</h1>
-      </header>
-      
-      <section class="detail-content">
-        <div id="flora-detail-root">
-          <div class="gallery-loading">Cargando información…</div>
+      <div class="detail-modal">
+        <div class="detail-header">
+          <nav class="breadcrumb">${createLink('/', 'Inicio')} / ${createLink('/flora', 'Flora')} / Detalle</nav>
+          <div class="controls">
+            <button class="detail-prev btn btn-outline">← Anterior</button>
+            <button class="detail-next btn btn-outline">Siguiente →</button>
+            ${createLink(backHref, backHref === '/' ? '← Volver al inicio' : '← Volver a Flora', 'btn btn-primary')}
+          </div>
         </div>
-      </section>
-      
-      <nav class="detail-nav">
-        ${createLink('/flora', '← Volver a Flora', 'btn btn-primary')}
-      </nav>
+        <div class="detail-content">
+          <div id="flora-detail-root"><div class="gallery-loading">Cargando información…</div></div>
+        </div>
+      </div>
     </div>
   `;
 
@@ -46,20 +44,42 @@ export function render(container, params) {
       try {
         const { planta, fotos } = await getPlantaCompleta(id);
 
+        // prepare images
+        const images = [];
+        if (planta?.foto_principal) images.push(planta.foto_principal.url_foto || planta.foto_principal);
+        if (Array.isArray(fotos)) fotos.forEach(f => images.push(f.url_foto || f.url || f.foto || ''));
+        if (images.length === 0) images.push('/placeholder-species.png');
+
         const wrap = document.createElement('div');
         wrap.className = 'flora-detail-wrap';
 
+        const imgsHTML = `
+          <div class="species-images">
+            ${images.map(img => `<img class="species-image" src="${img}" onerror="this.onerror=null;this.src='/placeholder-species.png'"/>`).join('')}
+          </div>`;
+
         const info = document.createElement('div');
-        info.className = 'flora-info';
+        info.className = 'species-meta';
         info.innerHTML = `
-          <h2>${(planta && (planta.nombre_comun || 'Sin nombre'))}</h2>
-          <h3><em>${(planta && planta.nombre_cientifico) || ''}</em></h3>
-          <p class="flora-desc">${(planta && planta.descripcion) || 'Sin descripción.'}</p>
-          <p><strong>Distribución:</strong> ${(planta && planta.distribucion) || '—'}</p>
-          <p><strong>Estado:</strong> ${(planta && (planta.estado_display || planta.estado)) || '—'}</p>
+          <h2>${planta?.nombre_comun || 'Sin nombre'}</h2>
+          <div class="species-quick">
+            ${planta?.nombre_cientifico ? `<div class="quick-item"><strong>Nombre científico:</strong><div class="quick-value" style="font-style:italic;color:#666;">${planta.nombre_cientifico}</div></div>` : ''}
+            <div class="quick-item"><strong>Estado (raw):</strong><div class="quick-value">${planta?.estado || '—'}</div></div>
+            <div class="quick-item"><strong>Estado (display):</strong><div class="quick-value">${planta?.estado_display || '—'}</div></div>
+          </div>
+          <div class="species-row"><strong>Distribución:</strong> ${planta?.distribucion || '—'}</div>
+          <div class="species-row"><strong>Descripción:</strong>
+            <div class="species-description">${planta?.descripcion || 'Sin descripción.'}</div>
+          </div>
         `;
 
-        wrap.appendChild(info);
+        wrap.innerHTML = '';
+        const grid = document.createElement('div');
+        grid.className = 'species-grid';
+        grid.innerHTML = imgsHTML;
+        grid.appendChild(info);
+
+        wrap.appendChild(grid);
 
         root.innerHTML = '';
         root.appendChild(wrap);
@@ -79,6 +99,25 @@ export function render(container, params) {
     }
 
     load();
+
+    // entry animation
+    const modal = document.querySelector('.detail-modal');
+    if (modal) { modal.classList.add('stack-enter'); modal.addEventListener('animationend', () => modal.classList.remove('stack-enter'), { once: true }); }
+
+    // Prev/Next
+    const prevBtn = document.querySelector('.detail-prev');
+    const nextBtn = document.querySelector('.detail-next');
+    const parsedId = Number(id);
+    const canUseNumeric = Number.isFinite(parsedId);
+    if (!canUseNumeric) { if (prevBtn) prevBtn.style.display = 'none'; if (nextBtn) nextBtn.style.display = 'none'; }
+    else {
+      if (prevBtn) prevBtn.addEventListener('click', (e) => {
+        e.preventDefault(); const targetId = String(parsedId - 1); if (!targetId) return; if (modal) { modal.classList.add('stack-exit-prev'); modal.addEventListener('animationend', () => { window.location.hash = `#/flora/${targetId}`; }, { once: true }); } else { window.location.hash = `#/flora/${targetId}`; }
+      });
+      if (nextBtn) nextBtn.addEventListener('click', (e) => {
+        e.preventDefault(); const targetId = String(parsedId + 1); if (!targetId) return; if (modal) { modal.classList.add('stack-exit-next'); modal.addEventListener('animationend', () => { window.location.hash = `#/flora/${targetId}`; }, { once: true }); } else { window.location.hash = `#/flora/${targetId}`; }
+      });
+    }
   })();
 }
 

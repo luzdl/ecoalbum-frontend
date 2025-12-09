@@ -115,7 +115,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: #4b5563;
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition: transform 160ms ease, box-shadow 160ms ease, bg 160ms ease;
   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
   display: inline-flex;
   align-items: center;
@@ -273,21 +273,25 @@
 /* Detail Page Styles */
 .fauna-detail-page {
   min-height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  /* Soft green liquid-glass overlay behind the modal */
+  background: linear-gradient(180deg, rgba(22, 80, 40, 0.12), rgba(18, 70, 36, 0.08));
+  backdrop-filter: blur(6px) saturate(1.05);
+  -webkit-backdrop-filter: blur(6px) saturate(1.05);
 }
 
 .detail-modal {
   background: #fff;
-  border-radius: 8px;
-  max-width: 920px;
-  width: 100%;
-  max-height: 86vh;
-  overflow: auto;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  /* Hacer la tarjeta más ancha para evitar scroll vertical */
+  max-width: 1200px;
+  width: min(95vw, 1200px);
+  max-height: 90vh;
+  overflow: hidden; /* evitamos scroll en el modal; el contenido interno controlará overflow */
+  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.32);
 }
 
 .detail-header {
@@ -321,7 +325,7 @@
 }
 
 .detail-content {
-  padding: 16px;
+  padding: 20px;
 }
 
 .species-grid {
@@ -346,33 +350,75 @@
   width: 100%;
 }
 
-.species-images img {
+.species-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr; /* imagen más ancha */
+  gap: 24px;
+  align-items: start;
+}
+.species-image {
   width: 100%;
-  height: 240px;
+  height: 320px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #f4f4f4;
 }
-
-.species-meta {
+.species-images {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  width: 100%;
+}
+.species-images img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f4f4f4;
+  font-size: 0.96rem;
+}
+  
+
+
+/* Paper stack animations */
+@keyframes stackIn {
+  0% { transform: translateY(20px) rotate(-2deg) scale(0.98); opacity: 0; }
+  100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+}
+@keyframes stackOutNext {
+  0% { transform: translateX(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateX(-40%) rotate(-8deg) scale(0.96); opacity: 0; }
+}
+@keyframes stackOutPrev {
+  0% { transform: translateX(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateX(40%) rotate(8deg) scale(0.96); opacity: 0; }
 }
 
-.species-row {
+.detail-modal.stack-enter {
+  animation: stackIn 360ms cubic-bezier(.2,.9,.3,1) both;
+}
+.detail-modal.stack-exit-next {
+  animation: stackOutNext 360ms cubic-bezier(.2,.9,.3,1) both;
+}
+.detail-modal.stack-exit-prev {
+  animation: stackOutPrev 360ms cubic-bezier(.2,.9,.3,1) both;
+}
+
+/* Header controls layout */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+}
+.detail-header .controls {
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 0.95rem;
-  color: #444;
 }
-
-.species-description {
-  margin-top: 8px;
-  line-height: 1.6;
-  color: #333;
-  font-size: 0.96rem;
+.detail-header .controls .btn {
+  padding: 0.55rem 0.9rem;
 }
 
 .species-row a {

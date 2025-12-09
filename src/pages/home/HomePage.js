@@ -71,9 +71,26 @@ function getEstadoBadgeClass(estado) {
 }
 
 /** HTML del badge de estado */
+/** Deriva una clase de badge a partir del texto que viene de la API */
+function estadoClassFromString(estado) {
+  if (!estado) return 'badge';
+  const s = String(estado).toUpperCase();
+  // Buscar códigos comúnmente usados
+  const codeMatch = s.match(/\b(LC|NT|VU|EN|CR)\b/i);
+  if (codeMatch) return `badge badge-${codeMatch[1].toLowerCase()}`;
+  // Fallback a palabras clave
+  if (s.includes('CRÍT') || s.includes('CRITIC')) return 'badge badge-cr';
+  if (s.includes('EN PELIG') || s.includes('EN PELIGRO')) return 'badge badge-en';
+  if (s.includes('VULN') || s.includes('VULNER')) return 'badge badge-vu';
+  if (s.includes('AMENAZ') || s.includes('CASI')) return 'badge badge-nt';
+  if (s.includes('PREOCUP') || s.includes('LC')) return 'badge badge-lc';
+  return 'badge';
+}
+
 function getStatusBadgeHTML(estado) {
-  const cls = getEstadoBadgeClass(estado);
-  return `<div class="${cls}"><span class="badge-dot"></span>${estado || "Sin clasificar"}</div>`;
+  const cls = estadoClassFromString(estado);
+  const text = estado || 'Sin clasificar';
+  return `<div class="${cls}" data-estado="${String(estado || '').replace(/\"/g,'')}"><span class="badge-dot"></span>${text}</div>`;
 }
 
 /* ===========================

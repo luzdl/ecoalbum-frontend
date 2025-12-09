@@ -197,14 +197,17 @@ class FloraPage {
     // helper: estado badge
     const getEstadoBadgeHTML = (estado) => {
       if (!estado) return `<div class="badge">Sin clasificar</div>`;
-      const s = String(estado).toLowerCase();
+      const s = String(estado || '').toUpperCase();
+      const codeMatch = s.match(/\b(LC|NT|VU|EN|CR)\b/i);
       let cls = 'badge';
-      if (s.includes('cr') || s.includes('crítico')) cls = 'badge badge-cr';
-      else if (s.includes('en') || s.includes('peligro')) cls = 'badge badge-en';
-      else if (s.includes('vu') || s.includes('vulnerable')) cls = 'badge badge-vu';
-      else if (s.includes('nt') || s.includes('amenaz')) cls = 'badge badge-nt';
-      else if (s.includes('lc') || s.includes('preocupación') || s.includes('preocupacion')) cls = 'badge badge-lc';
-      return `<div class="${cls}"><span class="badge-dot"></span>${estado}</div>`;
+      if (codeMatch) cls = `badge badge-${codeMatch[1].toLowerCase()}`;
+      else if (s.includes('CRÍT') || s.includes('CRITIC')) cls = 'badge badge-cr';
+      else if (s.includes('EN PELIG') || s.includes('EN PELIGRO')) cls = 'badge badge-en';
+      else if (s.includes('VULN') || s.includes('VULNER')) cls = 'badge badge-vu';
+      else if (s.includes('AMENAZ') || s.includes('CASI')) cls = 'badge badge-nt';
+      else if (s.includes('PREOCUP') || s.includes('LC')) cls = 'badge badge-lc';
+      const text = estado || 'Sin clasificar';
+      return `<div class="${cls}" data-estado="${String(estado).replace(/\"/g,'')}"><span class="badge-dot"></span>${text}</div>`;
     };
 
     // Pre-fetch detalles para cada planta

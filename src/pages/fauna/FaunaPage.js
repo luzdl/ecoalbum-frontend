@@ -1,4 +1,6 @@
-// ...existing code...
+import { createLink } from '../../router/router.js';
+import { createFlipCard, buildFront, buildBack } from '../../components/cards/FlipCard.js';
+import './FaunaPage.css';
 
 const STATUS_LABEL = {
   lc: 'Preocupación menor',
@@ -15,6 +17,13 @@ const STATUS_COLOR = {
   en: '#e74c3c', // Rojo
   cr: '#c0392b', // Rojo oscuro
 };
+
+function excerptText(t, len = 140) {
+  if (!t) return '';
+  const s = String(t).trim();
+  if (s.length <= len) return s;
+  return s.slice(0, len).trim() + '…';
+}
 
 class FaunaPage {
   constructor(container) {
@@ -35,9 +44,15 @@ class FaunaPage {
   render() {
     this.container.innerHTML = `
       <div class="fauna-page">
-        <header class="fauna-header">
-          <h1>Fauna del Álbum Ecológico</h1>
-          <p>Explora la biodiversidad de nuestra región</p>
+        <header class="fauna-header page-header">
+          <nav class="breadcrumb">${createLink('/', 'Inicio')} / ${createLink('/fauna','Fauna')}</nav>
+          <div class="header-row">
+            <div>
+              <h1>Fauna del Álbum Ecológico</h1>
+              <p>Explora la biodiversidad de nuestra región</p>
+            </div>
+            <div class="header-actions"></div>
+          </div>
         </header>
         
         <div class="fauna-filters">
@@ -89,11 +104,11 @@ class FaunaPage {
       statusFilter.addEventListener("change", async (e) => {
         this.filters.status = e.target.value;
         // Si hay un estado seleccionado, recarga desde la API con el query param
-        if (this.filters.status) {
-          await this.loadSpeciesWithStatus(this.filters.status);
-        } else {
-          await this.loadSpecies();
-        }
+          if (this.filters.status) {
+            await this.loadSpeciesWithStatus(this.filters.status);
+          } else {
+            await this.loadSpecies();
+          }
       });
     }
   }
@@ -156,7 +171,7 @@ class FaunaPage {
       this.species = allSpecies;
       console.log("Total species loaded:", this.species.length);
       this.populateFilters();
-      this.applyFilters();
+      await this.applyFilters();
     } catch (err) {
       console.error("Error:", err);
       this.species = [];
@@ -183,12 +198,26 @@ class FaunaPage {
         nextUrl = data.next || null;
       }
       this.species = allSpecies;
-      this.applyFilters();
+      await this.applyFilters();
     } catch (err) {
       this.species = [];
       this.showError(err.message || "Error al cargar especies");
     } finally {
       this.loading = false;
+    }
+  }
+
+  // Fetch detalle por especie (fauna)
+  async fetchFaunaDetail(id) {
+    if (!id) return null;
+    try {
+      const res = await fetch(`http://localhost:8000/api/fauna/fauna/${id}/`, { headers: { Accept: 'application/json' } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn('Error fetching fauna detail', id, err);
+      return null;
     }
   }
 
@@ -231,7 +260,7 @@ class FaunaPage {
     }
   }
 
-  applyFilters() {
+  async applyFilters() {
     this.filtered = this.species.filter((s) => {
       const matchQuery = !this.filters.query || s.nombre_comun?.toLowerCase().includes(this.filters.query.toLowerCase());
       // Comparar por ID de categoría (puede ser número o string)
@@ -244,10 +273,10 @@ class FaunaPage {
       const matchLetter = !this.filters.letter || s.nombre_comun?.toUpperCase().startsWith(this.filters.letter);
       return matchQuery && matchCategory && matchStatus && matchLetter;
     });
-    this.renderGallery();
+    await this.renderGallery();
   }
 
-  renderGallery() {
+  async renderGallery() {
     const gallery = document.getElementById("gallery");
     const empty = document.getElementById("empty");
     const error = document.getElementById("error");
@@ -261,43 +290,56 @@ class FaunaPage {
     if (this.filtered.length === 0) {
       gallery.style.display = "none";
       empty.style.display = "block";
+      gallery.innerHTML = '';
       return;
     }
 
-    gallery.innerHTML = this.filtered
-      .map(
-        (s) => `
-      <div class="gallery-item" data-id="${s.id}">
-        <div class="gallery-item-image">
-          <img src="${s.foto_principal || "/placeholder-species.png"}" alt="${s.nombre_comun}" />
-          <div class="gallery-item-overlay">
-            <button class="gallery-item-btn">Ver detalles</button>
-          </div>
-        </div>
-        <div class="gallery-item-info">
-          <h3 class="gallery-item-name">${s.nombre_comun || "Sin nombre"}</h3>
-          <p class="gallery-item-meta">
-            <span class="gallery-item-category">${this.getCategoryName(s.categoria)}</span>
-            ${s.estado ? (() => {
-              const code = (s.estado.match(/\(([a-zA-Z]{2})\)/) || [])[1]?.toLowerCase();
-              if (code && STATUS_LABEL[code]) {
-                return `<span class=\"gallery-item-status\" style=\"background:${STATUS_COLOR[code]}22;color:${STATUS_COLOR[code]}\">${STATUS_LABEL[code]} (${code.toUpperCase()})</span>`;
-              }
-              return `<span class=\"gallery-item-status\">${s.estado}</span>`;
-            })() : ""}
-          </p>
-        </div>
-      </div>
-    `
-      )
-      .join("");
+    // Construir FlipCards para cada especie (usa la misma lógica visual que la Home)
+    gallery.innerHTML = '';
+    const frag = document.createDocumentFragment();
 
-    gallery.querySelectorAll(".gallery-item").forEach((item) => {
-      item.addEventListener("click", () => {
-        const id = item.dataset.id;
-        window.location.hash = `/fauna/${id}`;
+    // Pre-fetch detalles para cada especie en paralelo
+    const details = await Promise.all(this.filtered.map(async (s) => {
+      const id = s.id || s.pk || s.id_planta || '';
+      return await this.fetchFaunaDetail(id);
+    }));
+
+    const getEstadoBadgeHTML = (estado) => {
+      if (!estado) return `<div class="badge">Sin clasificar</div>`;
+      const s = String(estado).toLowerCase();
+      let cls = 'badge';
+      if (s.includes('cr') || s.includes('crítico')) cls = 'badge badge-cr';
+      else if (s.includes('en') || s.includes('peligro')) cls = 'badge badge-en';
+      else if (s.includes('vu') || s.includes('vulnerable')) cls = 'badge badge-vu';
+      else if (s.includes('nt') || s.includes('amenaz')) cls = 'badge badge-nt';
+      else if (s.includes('lc') || s.includes('preocupación') || s.includes('preocupacion')) cls = 'badge badge-lc';
+      return `<div class="${cls}"><span class="badge-dot"></span>${estado}</div>`;
+    };
+
+    this.filtered.forEach((s, idx) => {
+      const id = s.id || s.pk || s.id_planta || '';
+      const img = s.foto_principal || s.url_foto || s.imagen || s.url || '/placeholder-species.png';
+      const nombre = s.nombre_comun || s.nombre_cientifico || 'Sin nombre';
+      const estado = s.estado || s.estado_conservacion || '';
+      const detail = details[idx] || {};
+
+      const front = buildFront({ image: img, title: nombre, subtitle: s.nombre_cientifico || '' });
+      const back = buildBack({
+        statusBadge: getEstadoBadgeHTML(estado),
+        // Mostrar distribución (si existe) y usar habitat desde detalle cuando esté disponible
+        paragraphs: [ (detail.distribucion && detail.distribucion.trim()) || (s.descripcion_foto && s.descripcion_foto.trim()) || (s.descripcion && s.descripcion.trim()) || 'Especie de fauna registrada en Panamá.' ],
+        habitat: detail.habitat || s.habitat || '',
+        region: detail.region || s.region || '',
+        actions: [
+          { label: 'Ver detalles', href: `#/fauna/${id}`, variant: 'btn-primary' }
+        ]
       });
+
+      const card = createFlipCard({ front, back, size: 'md', title: nombre });
+      frag.appendChild(card);
     });
+
+    gallery.appendChild(frag);
   }
 
   showLoading() {
@@ -323,4 +365,4 @@ export default async function render(container, params = {}) {
   const page = new FaunaPage(container);
   await page.init();
 }
-// ...existing code...
+// end of file

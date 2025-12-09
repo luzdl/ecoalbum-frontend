@@ -8,6 +8,8 @@
   width: 100%;
   height: 100%;
   background: transparent;
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden; /* ensure both faces are clipped to same rounded corners */
 }
 
 .flip-card-inner {
@@ -79,6 +81,8 @@
   flex-direction: column;
   gap: 0.5rem;
   flex: 1;
+  position: relative; /* needed for absolute actions */
+  min-height: 0; /* allow children flex with overflow */
 }
 
 .flip-title {
@@ -95,9 +99,53 @@
 }
 
 .flip-actions {
-  margin-top: auto;
   display: flex;
   gap: 0.5rem;
+  /* keep actions visible above content */
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 12px;
+  z-index: 3;
+  justify-content: flex-end;
+  pointer-events: auto;
+}
+
+/* Cuando el texto se desborda, difuminar hacia abajo y mantener botones al frente */
+.flip-card-back .flip-body {
+  position: relative;
+}
+
+/* El contenido principal (todo excepto acciones) debe poder scrollear internamente
+   y no expandir la tarjeta. Reservamos espacio para las acciones en la parte inferior. */
+.flip-card-back .flip-body > :not(.flip-actions) {
+  overflow: auto;
+  max-height: calc(100% - 72px); /* reservar espacio para acciones + padding */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Degradado en la parte inferior para dar efecto de difuminado sobre el contenido scrolleable */
+.flip-card-back .flip-body::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 56px; /* dejar espacio para las acciones */
+  height: 72px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 92%);
+  z-index: 2;
+}
+
+/* Hide visible scrollbars but keep scroll functionality */
+.flip-card-back .flip-body > :not(.flip-actions) {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.flip-card-back .flip-body > :not(.flip-actions)::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  display: none;
 }
 
 /* ============================================================

@@ -7,6 +7,8 @@ import { createLink } from '../../router/router.js';
 import { getPlantas, ESTADOS_CONSERVACION } from '../../services/floraService.js';
 import { createFilterBar } from '../../components/filters/FilterBar.js';
 import { loadGallery } from '../../components/gallery/Gallery.js';
+import { createFlipCard, buildFront, buildBack } from '../../components/cards/FlipCard.js';
+import './FloraPage.css';
 
 const STATUS_LABEL = {
   lc: 'Preocupación menor',
@@ -53,7 +55,6 @@ class FloraPage {
 
         <div class="flora-filters">
           <input type="search" id="search-input" class="filter-input" placeholder="Buscar planta..." aria-label="Buscar" />
-          <!-- filtro de familia eliminado porque no hay datos disponibles -->
           <select id="estado-filter" class="filter-select" aria-label="Filtrar por estado">
             <option value="">Estado</option>
           </select>
@@ -105,13 +106,27 @@ class FloraPage {
       else this.plantas = [];
 
       this.populateFilters();
-      this.applyFilters();
+      await this.applyFilters();
     } catch (err) {
       console.error('Error cargando plantas:', err);
       this.plantas = [];
       this.showError(err.message || 'Error al cargar plantas');
     } finally {
       this.loading = false;
+    }
+  }
+
+  // Fetch detalle por planta
+  async fetchFloraDetail(id) {
+    if (!id) return null;
+    try {
+      const res = await fetch(`http://localhost:8000/api/flora/flora/${id}/`, { headers: { Accept: 'application/json' } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn('Error fetching flora detail', id, err);
+      return null;
     }
   }
 
@@ -145,7 +160,7 @@ class FloraPage {
     }
   }
 
-  applyFilters() {
+  async applyFilters() {
     this.filtered = this.plantas.filter((p) => {
       const name = p.nombre_comun || p.nombre_cientifico || '';
       const matchQuery = !this.filters.query || name.toLowerCase().includes(this.filters.query.toLowerCase());
@@ -158,10 +173,10 @@ class FloraPage {
       return matchQuery && matchEstado && matchLetter;
     });
 
-    this.renderGallery();
+    await this.renderGallery();
   }
 
-  renderGallery() {
+  async renderGallery() {
     const gallery = document.getElementById('gallery');
     const empty = document.getElementById('empty');
     const error = document.getElementById('error');
@@ -179,41 +194,50 @@ class FloraPage {
       return;
     }
 
-    gallery.innerHTML = this.filtered
-      .map((p) => {
-        const id = p.id_planta || p.id || p.pk || '';
-        const img = p.foto_principal || p.url_foto || p.imagen || p.url || '/placeholder-species.png';
-        const nombre = p.nombre_comun || p.nombre_cientifico || 'Sin nombre';
-        const familia = p.familia || '—';
-        const estado = p.estado || p.estado_conservacion || '';
+    // helper: estado badge
+    const getEstadoBadgeHTML = (estado) => {
+      if (!estado) return `<div class="badge">Sin clasificar</div>`;
+      const s = String(estado).toLowerCase();
+      let cls = 'badge';
+      if (s.includes('cr') || s.includes('crítico')) cls = 'badge badge-cr';
+      else if (s.includes('en') || s.includes('peligro')) cls = 'badge badge-en';
+      else if (s.includes('vu') || s.includes('vulnerable')) cls = 'badge badge-vu';
+      else if (s.includes('nt') || s.includes('amenaz')) cls = 'badge badge-nt';
+      else if (s.includes('lc') || s.includes('preocupación') || s.includes('preocupacion')) cls = 'badge badge-lc';
+      return `<div class="${cls}"><span class="badge-dot"></span>${estado}</div>`;
+    };
 
-        return `
-        <div class="gallery-item" data-id="${id}">
-          <div class="gallery-item-image">
-            <img src="${img}" alt="${nombre}" onerror="this.src='/placeholder-species.png'" />
-            <div class="gallery-item-overlay">
-              <button class="gallery-item-btn">Ver detalles</button>
-            </div>
-          </div>
-          <div class="gallery-item-info">
-            <h3 class="gallery-item-name">${nombre}</h3>
-            <p class="gallery-item-meta">
-              <span class="gallery-item-family">${familia}</span>
-              ${estado ? `<span class="gallery-item-status">${estado}</span>` : ''}
-            </p>
-          </div>
-        </div>
-      `;
-      })
-      .join('');
+    // Pre-fetch detalles para cada planta
+    const details = await Promise.all(this.filtered.map(async (p) => {
+      const id = p.id_planta || p.id || p.pk || '';
+      return await this.fetchFloraDetail(id);
+    }));
 
-    gallery.querySelectorAll('.gallery-item').forEach((item) => {
-      item.addEventListener('click', () => {
-        const id = item.dataset.id;
-        if (!id) return;
-        window.location.hash = `/flora/${id}`;
+    gallery.innerHTML = '';
+    const frag = document.createDocumentFragment();
+
+    this.filtered.forEach((p, idx) => {
+      const id = p.id_planta || p.id || p.pk || '';
+      const img = p.foto_principal || p.url_foto || p.imagen || p.url || '/placeholder-species.png';
+      const nombre = p.nombre_comun || p.nombre_cientifico || 'Sin nombre';
+      const estado = p.estado || p.estado_conservacion || '';
+      const detail = details[idx] || {};
+
+      const front = buildFront({ image: img, title: nombre, subtitle: p.nombre_cientifico || '' });
+      const back = buildBack({
+        statusBadge: getEstadoBadgeHTML(estado),
+        // Mostrar solo el campo 'distribucion' desde el detalle cuando exista
+        paragraphs: [ (detail.distribucion && detail.distribucion.trim()) || (p.distribucion && p.distribucion.trim()) || (p.descripcion && p.descripcion.trim()) || 'Especie de flora registrada en Panamá.' ],
+        habitat: detail.habitat || p.habitat || '',
+        region: detail.region || p.region || '',
+        actions: [ { label: 'Ver detalles', href: `#/flora/${id}`, variant: 'btn-primary' } ]
       });
+
+      const card = createFlipCard({ front, back, size: 'md', title: nombre });
+      frag.appendChild(card);
     });
+
+    gallery.appendChild(frag);
   }
 
   showLoading() {

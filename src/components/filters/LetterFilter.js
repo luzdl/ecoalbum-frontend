@@ -18,7 +18,6 @@ export function createLetterFilter({ letters = DEFAULT_LETTERS, value = '', onCh
   container.setAttribute('role', 'tablist');
   container.setAttribute('aria-label', 'Filtrar por letra');
   container.className = 'letter-filter';
-  container.style.cssText = 'display: flex; gap: 6px; align-items: center; flex-wrap: wrap;';
   
   let currentValue = value;
   
@@ -30,7 +29,7 @@ export function createLetterFilter({ letters = DEFAULT_LETTERS, value = '', onCh
     allBtn.type = 'button';
     allBtn.textContent = 'Todas';
     allBtn.className = 'letter-btn' + (currentValue === '' ? ' active' : '');
-    allBtn.style.cssText = `padding: 4px 6px; opacity: ${currentValue === '' ? 1 : 0.7};`;
+    allBtn.dataset.letter = '';
     allBtn.setAttribute('aria-pressed', currentValue === '');
     allBtn.addEventListener('click', () => {
       currentValue = '';
@@ -45,7 +44,7 @@ export function createLetterFilter({ letters = DEFAULT_LETTERS, value = '', onCh
       btn.type = 'button';
       btn.textContent = l;
       btn.className = 'letter-btn' + (currentValue === l ? ' active' : '');
-      btn.style.cssText = `padding: 4px 6px; background: ${currentValue === l ? '#ddd' : 'transparent'};`;
+      btn.dataset.letter = l;
       btn.setAttribute('aria-pressed', currentValue === l);
       btn.addEventListener('click', () => {
         currentValue = l;
